@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/profile.css"/>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <a href="index.html" class="nav-logo sidebar-logo">ENOVA<span>.</span>dev</a>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="lesson.html" class="sidebar-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Lessons
+    </a>
+    <a href="profile.html" class="sidebar-link active">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a href="certificate.html" class="sidebar-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      Certificate
+    </a>
+  </nav>
+  <button class="sidebar-logout" id="logoutBtn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sign Out
+  </button>
+</aside>
+
+<main class="dash-main">
+
+  <!-- Profile hero -->
+  <div class="profile-hero">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar" id="profileAvatar">?</div>
+      <div class="profile-avatar-ring"></div>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name" id="profileName">Loading...</h1>
+      <p class="profile-email" id="profileEmail"></p>
+      <div class="profile-badges">
+        <div class="badge badge-cyan" id="profileLevel">Lv. 1</div>
+        <div class="badge badge-gold" id="profileXP">0 XP</div>
+        <div class="badge badge-violet" id="profileJoined">Joined —</div>
+      </div>
+    </div>
+    <button class="btn-ghost edit-profile-btn" id="editBtn" onclick="toggleEdit()">✏ Edit Profile</button>
+  </div>
+
+  <!-- Edit form (hidden by default) -->
+  <div class="edit-card" id="editCard" style="display:none">
+    <h3 class="edit-title">Edit Profile</h3>
+    <div class="edit-form">
+      <div class="input-group">
+        <label class="input-label">Display Name</label>
+        <input class="input-field" id="editName" type="text" placeholder="Your name"/>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+        <button class="btn-ghost" onclick="toggleEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="section-label">Your Stats</div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-info">
+        <div class="stat-value" id="statLessons">0</div>
+        <div class="stat-label">Lessons Done</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-info">
+        <div class="stat-value" id="statXP">0</div>
+        <div class="stat-label">Total XP</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-info">
+        <div class="stat-value" id="statStreak">0</div>
+        <div class="stat-label">Day Streak</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📜</div>
+      <div class="stat-info">
+        <div class="stat-value" id="statCerts">0</div>
+        <div class="stat-label">Certificates</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Track progress -->
+  <div class="section-label">Track Progress</div>
+  <div class="tracks-progress">
+    <div class="track-progress-card">
+      <div class="tp-header">
+        <div><div class="tp-icon" style="color:#e34c26">⬡</div><div class="tp-name">HTML</div></div>
+        <div class="tp-pct" id="htmlPct">0%</div>
+      </div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="htmlBar" style="width:0%;background:#e34c26"></div></div>
+      <div class="tp-lessons" id="htmlLessons">0 / 8 lessons</div>
+    </div>
+    <div class="track-progress-card">
+      <div class="tp-header">
+        <div><div class="tp-icon" style="color:#264de4">◈</div><div class="tp-name">CSS</div></div>
+        <div class="tp-pct" id="cssPct">0%</div>
+      </div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="cssBar" style="width:0%;background:#264de4"></div></div>
+      <div class="tp-lessons" id="cssLessons">0 / 6 lessons</div>
+    </div>
+    <div class="track-progress-card">
+      <div class="tp-header">
+        <div><div class="tp-icon" style="color:#f7df1e">⬟</div><div class="tp-name">JavaScript</div></div>
+        <div class="tp-pct" id="jsPct">0%</div>
+      </div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="jsBar" style="width:0%;background:#f7df1e"></div></div>
+      <div class="tp-lessons" id="jsLessons">0 / 8 lessons</div>
+    </div>
+  </div>
+
+  <!-- Completed lessons -->
+  <div class="section-label">Completed Lessons</div>
+  <div class="completed-list" id="completedList">
+    <p style="color:var(--text-3);font-size:14px;font-family:var(--font-mono)">No lessons completed yet. <a href="lesson.html" style="color:var(--cyan)">Start learning →</a></p>
+  </div>
+
+</main>
+
+<div class="toast-container"></div>
+
+<script type="module">
+  import { requireAuth, getUserProfile, logout } from "./js/auth.js";
+  import { CURRICULUM, getTrackProgress } from "./js/curriculum.js";
+  import { showToast } from "./js/toast.js";
+  import { updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { auth, db } from "./js/firebase-config.js";
+
+  const user = await requireAuth("/login.html");
+  const profile = await getUserProfile(user.uid);
+  const completed = profile?.completedLessons || [];
+
+  // Fill profile
+  const name = profile?.displayName || user.displayName || "Developer";
+  document.getElementById("profileName").textContent = name;
+  document.getElementById("profileEmail").textContent = user.email || user.phoneNumber || "";
+  document.getElementById("profileAvatar").textContent = name.charAt(0).toUpperCase();
+  document.getElementById("profileLevel").textContent = `Lv. ${profile?.level || 1}`;
+  document.getElementById("profileXP").textContent = `${(profile?.xp || 0).toLocaleString()} XP`;
+  document.getElementById("editName").value = name;
+
+  if (profile?.joinedAt?.seconds) {
+    const d = new Date(profile.joinedAt.seconds * 1000);
+    document.getElementById("profileJoined").textContent = `Joined ${d.toLocaleDateString("en-US", { month: "short", year: "numeric" })}`;
+  }
+
+  // Stats
+  document.getElementById("statLessons").textContent = completed.length;
+  document.getElementById("statXP").textContent = (profile?.xp || 0).toLocaleString();
+  document.getElementById("statStreak").textContent = profile?.streak || 0;
+  document.getElementById("statCerts").textContent = (profile?.certificates || []).length;
+
+  // Track progress
+  const tracks = [
+    { key: "html", pctId: "htmlPct", barId: "htmlBar", lessonsId: "htmlLessons" },
+    { key: "css", pctId: "cssPct", barId: "cssBar", lessonsId: "cssLessons" },
+    { key: "js", pctId: "jsPct", barId: "jsBar", lessonsId: "jsLessons" },
+  ];
+  tracks.forEach(t => {
+    const prog = getTrackProgress(t.key, completed);
+    document.getElementById(t.pctId).textContent = prog.pct + "%";
+    document.getElementById(t.barId).style.width = prog.pct + "%";
+    document.getElementById(t.lessonsId).textContent = `${prog.done} / ${prog.total} lessons`;
+  });
+
+  // Completed lessons list
+  if (completed.length > 0) {
+    const list = document.getElementById("completedList");
+    list.innerHTML = "";
+    completed.forEach(id => {
+      const trackKey = id.split("-")[0];
+      const track = CURRICULUM[trackKey];
+      const level = track?.levels.find(l => l.id === id);
+      if (!level) return;
+      const item = document.createElement("div");
+      item.className = "completed-item";
+      item.innerHTML = `
+        <div class="completed-item-left">
+          <span style="color:${track.color}">${track.icon}</span>
+          <div>
+            <div class="completed-item-title">${level.title}</div>
+            <div class="completed-item-track">${track.label}</div>
+          </div>
+        </div>
+        <div class="completed-item-right">
+          <span class="completed-xp">+${level.xp} XP</span>
+          <span class="completed-check">✓</span>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  // Edit profile
+  window.toggleEdit = function() {
+    const card = document.getElementById("editCard");
+    card.style.display = card.style.display === "none" ? "block" : "none";
+  };
+
+  window.saveProfile = async function() {
+    const newName = document.getElementById("editName").value.trim();
+    if (!newName) return showToast("Name cannot be empty", "error");
+    try {
+      await updateProfile(user, { displayName: newName });
+      await setDoc(doc(db, "users", user.uid), { displayName: newName }, { merge: true });
+      document.getElementById("profileName").textContent = newName;
+      document.getElementById("profileAvatar").textContent = newName.charAt(0).toUpperCase();
+      showToast("Profile updated!", "success");
+      window.toggleEdit();
+    } catch {
+      showToast("Failed to update profile.", "error");
+    }
+  };
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => { await logout(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lesson — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/lesson.css"/>
+  <!-- CodeMirror 6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="lesson-topbar">
+  <div class="lesson-topbar-left">
+    <a href="dashboard.html" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <a href="index.html" class="nav-logo" style="font-size:16px">ENOVA<span>.</span>dev</a>
+    <div class="lesson-breadcrumb">
+      <span id="trackLabel">HTML</span>
+      <span style="color:var(--text-3)">›</span>
+      <span id="lessonTitle">Loading...</span>
+    </div>
+  </div>
+  <div class="lesson-topbar-right">
+    <div class="lesson-xp-badge" id="lessonXP">+100 XP</div>
+    <button class="btn-primary run-btn" id="runBtn" onclick="runCode()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Run
+    </button>
+    <button class="btn-ghost check-btn" id="checkBtn" onclick="checkSolution()">
+      Check Solution
+    </button>
+    <a href="dashboard.html" class="btn-ghost" style="font-size:13px;padding:8px 16px;">Dashboard</a>
+  </div>
+</header>
+
+<!-- Main layout -->
+<div class="lesson-layout">
+
+  <!-- Left: Theory panel -->
+  <aside class="theory-panel" id="theoryPanel">
+    <div class="theory-inner">
+      <div class="theory-badge" id="theoryObjective"></div>
+      <h2 class="theory-title" id="theoryLessonTitle">Loading...</h2>
+      <div class="theory-body" id="theoryBody"></div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <span class="task-icon">🎯</span>
+          <span>Your Task</span>
+        </div>
+        <p class="task-desc" id="taskDesc"></p>
+        <div class="hints-section" id="hintsSection"></div>
+      </div>
+
+      <!-- Nav buttons -->
+      <div class="lesson-nav">
+        <button class="btn-ghost lesson-nav-btn" id="prevBtn" onclick="goPrev()">← Previous</button>
+        <button class="btn-primary lesson-nav-btn" id="nextBtn" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Center: Editor -->
+  <div class="editor-panel">
+    <div class="editor-topbar">
+      <div class="editor-tabs">
+        <div class="editor-tab active">index.html</div>
+      </div>
+      <div class="editor-actions">
+        <button class="editor-action-btn" onclick="resetCode()" title="Reset to starter">↺ Reset</button>
+        <button class="editor-action-btn" onclick="copyCode()" title="Copy code">⎘ Copy</button>
+      </div>
+    </div>
+    <div id="editorContainer"></div>
+  </div>
+
+  <!-- Right: Preview + AI -->
+  <div class="right-panel">
+
+    <!-- Preview -->
+    <div class="preview-panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-dot" style="background:var(--green)"></span>
+          Live Preview
+        </span>
+        <button class="editor-action-btn" onclick="refreshPreview()">↺</button>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Preview"></iframe>
+      </div>
+    </div>
+
+    <!-- AI Tutor -->
+    <div class="ai-panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-dot ai-dot"></span>
+          ENOVA AI Tutor
+        </span>
+        <button class="editor-action-btn" onclick="clearChat()">✕ Clear</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg ai-msg-bot">
+          <div class="ai-msg-avatar">AI</div>
+          <div class="ai-msg-bubble">
+            Hey! I'm your ENOVA AI tutor 👋<br/>
+            Ask me anything about this lesson, paste your code for a review, or type <strong>/hint</strong> for a clue.
+          </div>
+        </div>
+      </div>
+      <div class="ai-input-row">
+        <input
+          class="ai-input"
+          id="aiInput"
+          placeholder="Ask anything or type /hint..."
+          type="text"
+        />
+        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Success modal -->
+<div class="modal-overlay" id="successModal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-icon">🎉</div>
+    <h2 class="modal-title">Lesson Complete!</h2>
+    <p class="modal-sub" id="modalSub">You earned +100 XP</p>
+    <div class="modal-xp" id="modalXP">+100 XP</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="modalNext" onclick="goNext()">Next Lesson →</button>
+      <a href="dashboard.html" class="btn-ghost">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+
+<script type="module">
+  import { requireAuth, getUserProfile, completeLesson } from "./js/auth.js";
+  import { CURRICULUM, getLevelById, getNextLesson, TRACKS } from "./js/curriculum.js";
+  import { showToast } from "./js/toast.js";
+
+  const user = await requireAuth("/login.html");
+  const profile = await getUserProfile(user.uid);
+  const completed = profile?.completedLessons || [];
+
+  // Get lesson id from URL
+  const params = new URLSearchParams(window.location.search);
+  let currentId = params.get("id") || "html-1";
+  let currentLesson = getLevelById(currentId);
+  if (!currentLesson) { currentId = "html-1"; currentLesson = getLevelById("html-1"); }
+
+  let editor;
+  let isSubmitting = false;
+
+  // ─── Init CodeMirror ────────────────────────────────────────────
+  function initEditor(code) {
+    if (editor) editor.toTextArea();
+    const ta = document.createElement("textarea");
+    ta.id = "codeEditor";
+    document.getElementById("editorContainer").innerHTML = "";
+    document.getElementById("editorContainer").appendChild(ta);
+    ta.value = code;
+
+    editor = CodeMirror.fromTextArea(ta, {
+      mode: "htmlmixed",
+      theme: "default",
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseTags: true,
+      indentUnit: 2,
+      tabSize: 2,
+      lineWrapping: false,
+      extraKeys: { "Ctrl-Enter": runCode, "Cmd-Enter": runCode }
+    });
+
+    // Override CM default theme with our dark theme
+    editor.on("change", () => {
+      if (window._autoRun) clearTimeout(window._autoRun);
+      window._autoRun = setTimeout(runCode, 800);
+    });
+
+    setTimeout(() => { editor.refresh(); runCode(); }, 100);
+  }
+
+  // ─── Load Lesson ────────────────────────────────────────────────
+  function loadLesson(lesson) {
+    currentLesson = lesson;
+    currentId = lesson.id;
+    const trackKey = lesson.id.split("-")[0];
+    const track = CURRICULUM[trackKey];
+
+    document.getElementById("trackLabel").textContent = track.label;
+    document.getElementById("lessonTitle").textContent = lesson.title;
+    document.getElementById("theoryLessonTitle").textContent = lesson.title;
+    document.getElementById("theoryObjective").textContent = lesson.objective;
+    document.getElementById("theoryBody").innerHTML = lesson.theory;
+    document.getElementById("taskDesc").textContent = lesson.task;
+    document.getElementById("lessonXP").textContent = `+${lesson.xp} XP`;
+    document.getElementById("modalSub").textContent = `You earned +${lesson.xp} XP`;
+    document.getElementById("modalXP").textContent = `+${lesson.xp} XP`;
+    document.title = `${lesson.title} — ENOVA Dev`;
+
+    // Hints
+    const hintsEl = document.getElementById("hintsSection");
+    hintsEl.innerHTML = lesson.hints.map(h => `<div class="hint-item">💡 ${h}</div>`).join("");
+
+    // Prev/Next
+    const allLessons = TRACKS.flatMap(t => CURRICULUM[t].levels);
+    const idx = allLessons.findIndex(l => l.id === lesson.id);
+    document.getElementById("prevBtn").disabled = idx === 0;
+    document.getElementById("nextBtn").textContent = idx === allLessons.length - 1 ? "Finish 🎓" : "Next →";
+
+    // Done indicator
+    if (completed.includes(lesson.id)) {
+      document.getElementById("checkBtn").textContent = "✓ Completed";
+      document.getElementById("checkBtn").style.borderColor = "var(--green)";
+      document.getElementById("checkBtn").style.color = "var(--green)";
+    } else {
+      document.getElementById("checkBtn").textContent = "Check Solution";
+      document.getElementById("checkBtn").style.borderColor = "";
+      document.getElementById("checkBtn").style.color = "";
+    }
+
+    initEditor(lesson.starterCode);
+
+    // Greet AI for this lesson
+    addAIMessage(`New lesson loaded: **${lesson.title}**\n\n${lesson.objective}\n\nI'm here to help! Ask me anything or type /hint if you're stuck.`, "bot");
+  }
+
+  // ─── Run Code ───────────────────────────────────────────────────
+  window.runCode = function() {
+    const code = editor.getValue();
+    const frame = document.getElementById("previewFrame");
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open(); doc.write(code); doc.close();
+  };
+
+  window.refreshPreview = runCode;
+
+  window.resetCode = function() {
+    if (confirm("Reset to starter code?")) initEditor(currentLesson.starterCode);
+  };
+
+  window.copyCode = function() {
+    navigator.clipboard.writeText(editor.getValue());
+    showToast("Code copied!", "success");
+  };
+
+  // ─── Check Solution ─────────────────────────────────────────────
+  window.checkSolution = async function() {
+    if (isSubmitting) return;
+    const code = editor.getValue();
+    if (currentLesson.solutionCheck && !currentLesson.solutionCheck(code)) {
+      showToast("Not quite! Check the hints or ask the AI tutor.", "error");
+      addAIMessage("It looks like the solution check didn't pass. Want a hint? Type `/hint` or describe where you're stuck!", "bot");
+      return;
+    }
+    isSubmitting = true;
+    try {
+      await completeLesson(user.uid, currentLesson.id, currentLesson.xp);
+      if (!completed.includes(currentLesson.id)) completed.push(currentLesson.id);
+      document.getElementById("successModal").style.display = "flex";
+      document.getElementById("checkBtn").textContent = "✓ Completed";
+      document.getElementById("checkBtn").style.borderColor = "var(--green)";
+      document.getElementById("checkBtn").style.color = "var(--green)";
+      showToast(`+${currentLesson.xp} XP earned! 🎉`, "success");
+    } catch(e) {
+      showToast("Error saving progress.", "error");
+    }
+    isSubmitting = false;
+  };
+
+  // ─── Navigation ─────────────────────────────────────────────────
+  window.goPrev = function() {
+    const all = TRACKS.flatMap(t => CURRICULUM[t].levels);
+    const idx = all.findIndex(l => l.id === currentLesson.id);
+    if (idx > 0) { loadLesson(all[idx - 1]); window.history.replaceState({}, "", `?id=${all[idx-1].id}`); }
+  };
+
+  window.goNext = function() {
+    document.getElementById("successModal").style.display = "none";
+    const all = TRACKS.flatMap(t => CURRICULUM[t].levels);
+    const idx = all.findIndex(l => l.id === currentLesson.id);
+    if (idx < all.length - 1) { loadLesson(all[idx + 1]); window.history.replaceState({}, "", `?id=${all[idx+1].id}`); }
+    else window.location.href = "certificate.html";
+  };
+
+  // ─── AI Tutor ───────────────────────────────────────────────────
+  const aiMessages = [];
+
+  function addAIMessage(text, role) {
+    const container = document.getElementById("aiMessages");
+    const wrap = document.createElement("div");
+    wrap.className = `ai-msg ai-msg-${role === "bot" ? "bot" : "user"}`;
+    if (role === "bot") {
+      wrap.innerHTML = `<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble">${text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/`(.*?)`/g, "<code>$1</code>").replace(/\n/g, "<br/>")}</div>`;
+    } else {
+      wrap.innerHTML = `<div class="ai-msg-bubble ai-msg-user-bubble">${text}</div>`;
+    }
+    container.appendChild(wrap);
+    container.scrollTop = container.scrollHeight;
+    if (role === "user") aiMessages.push({ role: "user", content: text });
+  }
+
+  function addTypingIndicator() {
+    const container = document.getElementById("aiMessages");
+    const el = document.createElement("div");
+    el.className = "ai-msg ai-msg-bot";
+    el.id = "typingIndicator";
+    el.innerHTML = `<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function removeTypingIndicator() {
+    document.getElementById("typingIndicator")?.remove();
+  }
+
+  window.sendAIMessage = async function() {
+    const input = document.getElementById("aiInput");
+    let msg = input.value.trim();
+    if (!msg) return;
+
+    // Handle /hint command
+    if (msg === "/hint") {
+      const hints = currentLesson.hints;
+      const hint = hints[Math.floor(Math.random() * hints.length)];
+      input.value = "";
+      addAIMessage("/hint", "user");
+      addAIMessage(`Here's a hint 💡<br/><br/><strong>${hint}</strong>`, "bot");
+      return;
+    }
+
+    input.value = "";
+    addAIMessage(msg, "user");
+    addTypingIndicator();
+    document.getElementById("aiSendBtn").disabled = true;
+
+    const code = editor.getValue();
+    const systemPrompt = `You are ENOVA Dev AI — a sharp, concise, encouraging coding tutor for web development beginners.
+
+Current lesson: "${currentLesson.title}"
+Objective: ${currentLesson.objective}
+Task: ${currentLesson.task}
+
+Student's current code:
+\`\`\`html
+${code}
+\`\`\`
+
+Rules:
+- Be concise (under 150 words unless a detailed explanation is essential)
+- Never give the full solution — guide with hints and small steps
+- Use code snippets in backticks for inline code
+- Celebrate progress genuinely but briefly
+- If they ask for a hint, give one specific actionable hint
+- Point out errors kindly but clearly`;
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemPrompt,
+          messages: [...aiMessages, { role: "user", content: msg }]
+        })
+      });
+      const data = await res.json();
+      removeTypingIndicator();
+      const reply = data.reply || "Something went wrong, try again.";
+      aiMessages.push({ role: "assistant", content: reply });
+      addAIMessage(reply, "bot");
+    } catch {
+      removeTypingIndicator();
+      addAIMessage("Connection error. Make sure you're on a deployed version with the API endpoint.", "bot");
+    }
+
+    document.getElementById("aiSendBtn").disabled = false;
+  };
+
+  window.clearChat = function() {
+    document.getElementById("aiMessages").innerHTML = "";
+    aiMessages.length = 0;
+    addAIMessage("Chat cleared! Ask me anything about this lesson 👋", "bot");
+  };
+
+  // Enter key
+  document.getElementById("aiInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendAIMessage();
+  });
+
+  // ─── Init ───────────────────────────────────────────────────────
+  loadLesson(currentLesson);
+</script>
+</body>
+</html>
