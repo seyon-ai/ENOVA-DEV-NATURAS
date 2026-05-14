@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Certificate — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/certificate.css"/>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <a href="index.html" class="nav-logo sidebar-logo">ENOVA<span>.</span>dev</a>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="lesson.html" class="sidebar-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Lessons
+    </a>
+    <a href="profile.html" class="sidebar-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a href="certificate.html" class="sidebar-link active">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      Certificate
+    </a>
+  </nav>
+  <button class="sidebar-logout" id="logoutBtn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sign Out
+  </button>
+</aside>
+
+<main class="dash-main">
+
+  <div class="dash-header">
+    <div>
+      <p class="dash-greeting">Your Certificates</p>
+      <h1 class="dash-name">Hall of Achievement</h1>
+    </div>
+  </div>
+
+  <!-- Locked state (shown if not all done) -->
+  <div id="lockedSection">
+    <div class="section-label">Track Completion</div>
+    <div class="cert-track-status" id="certTrackStatus"></div>
+    <div class="cert-locked-msg" id="certLockedMsg" style="display:none">
+      <div class="cert-locked-icon">🔒</div>
+      <h3>Complete all lessons to unlock your certificate</h3>
+      <p>Finish all HTML, CSS, and JavaScript tracks to earn your full certificate.</p>
+      <a href="lesson.html" class="btn-primary">Continue Learning →</a>
+    </div>
+  </div>
+
+  <!-- Certificate preview -->
+  <div id="certSection" style="display:none">
+    <div class="section-label">Your Certificate</div>
+    <div class="cert-actions">
+      <button class="btn-primary" onclick="downloadCertificate()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PNG
+      </button>
+      <button class="btn-ghost" onclick="downloadPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Download PDF
+      </button>
+    </div>
+    <div class="cert-preview-wrap">
+      <canvas id="certCanvas" width="1200" height="848"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast-container"></div>
+
+<script type="module">
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { auth, db } from "./js/firebase-config.js";
+  import { showToast } from "./js/toast.js";
+  import { getTrackProgress } from "./js/curriculum.js";
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "login.html"; return; }
+    let profile = {}, completed = [];
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      profile = snap.exists() ? snap.data() : {};
+      completed = profile.completedLessons || [];
+    } catch(e) { console.warn("Could not load profile", e); }
+    initCertPage(user, profile, completed);
+  });
+
+  function initCertPage(user, profile, completed) {
+
+  // Track status cards
+  const statusEl = document.getElementById("certTrackStatus");
+  const tracks = [
+    { key: "html", label: "HTML", icon: "⬡", color: "#e34c26", total: 8 },
+    { key: "css", label: "CSS", icon: "◈", color: "#264de4", total: 6 },
+    { key: "js", label: "JavaScript", icon: "⬟", color: "#f7df1e", total: 8 },
+  ];
+
+  let allComplete = true;
+  tracks.forEach(t => {
+    const prog = getTrackProgress(t.key, completed);
+    if (prog.done < prog.total) allComplete = false;
+    const card = document.createElement("div");
+    card.className = `cert-track-card ${prog.done === prog.total ? "cert-track-done" : ""}`;
+    card.innerHTML = `
+      <div class="cert-track-icon" style="color:${t.color}">${t.icon}</div>
+      <div class="cert-track-info">
+        <div class="cert-track-name">${t.label}</div>
+        <div class="xp-bar-track" style="margin-top:8px"><div class="xp-bar-fill" style="width:${prog.pct}%;background:${t.color}"></div></div>
+        <div class="cert-track-lessons">${prog.done} / ${prog.total} lessons</div>
+      </div>
+      <div class="cert-track-badge">${prog.done === prog.total ? "✓ Complete" : `${prog.pct}%`}</div>
+    `;
+    statusEl.appendChild(card);
+  });
+
+  if (!allComplete) {
+    document.getElementById("certLockedMsg").style.display = "flex";
+  } else {
+    document.getElementById("certSection").style.display = "block";
+    window._certUser = user;
+    renderCertificate(profile?.displayName || user.displayName || "Developer");
+
+    // Save cert to profile
+    const certId = `ENOVA-${(window._certUser?.uid || 'XXXXXXXX').slice(0,8).toUpperCase()}`;
+    await setDoc(doc(db, "users", user.uid), {
+      certificates: [{ id: certId, issuedAt: new Date().toISOString(), type: "Full Stack Web" }]
+    }, { merge: true });
+  }
+
+  function renderCertificate(name) {
+    const canvas = document.getElementById("certCanvas");
+    const ctx = canvas.getContext("2d");
+    const W = 1200, H = 848;
+
+    // Background
+    ctx.fillStyle = "#050508";
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid pattern
+    ctx.strokeStyle = "rgba(255,255,255,0.025)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // Glow orbs
+    const grad1 = ctx.createRadialGradient(200, 200, 0, 200, 200, 400);
+    grad1.addColorStop(0, "rgba(0,212,255,0.08)");
+    grad1.addColorStop(1, "transparent");
+    ctx.fillStyle = grad1; ctx.fillRect(0, 0, W, H);
+
+    const grad2 = ctx.createRadialGradient(1000, 648, 0, 1000, 648, 400);
+    grad2.addColorStop(0, "rgba(124,58,237,0.08)");
+    grad2.addColorStop(1, "transparent");
+    ctx.fillStyle = grad2; ctx.fillRect(0, 0, W, H);
+
+    // Outer border
+    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(32, 32, W - 64, H - 64);
+
+    // Inner border
+    ctx.strokeStyle = "rgba(0,212,255,0.15)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(48, 48, W - 96, H - 96);
+
+    // Top accent line
+    const accentGrad = ctx.createLinearGradient(48, 48, W - 48, 48);
+    accentGrad.addColorStop(0, "transparent");
+    accentGrad.addColorStop(0.3, "#00d4ff");
+    accentGrad.addColorStop(0.7, "#7c3aed");
+    accentGrad.addColorStop(1, "transparent");
+    ctx.strokeStyle = accentGrad;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(48, 48); ctx.lineTo(W - 48, 48); ctx.stroke();
+
+    // Corner ornaments
+    const corners = [[64, 64], [W - 64, 64], [64, H - 64], [W - 64, H - 64]];
+    corners.forEach(([cx, cy]) => {
+      ctx.strokeStyle = "rgba(0,212,255,0.3)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI * 2); ctx.stroke();
+    });
+
+    // ENOVA Dev logo
+    ctx.font = "bold 18px 'Arial'";
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.textAlign = "center";
+    ctx.fillText("ENOVA.dev", W / 2, 110);
+
+    // Certificate of Completion
+    ctx.font = "12px 'Courier New'";
+    ctx.fillStyle = "#00d4ff";
+    ctx.letterSpacing = "4px";
+    ctx.fillText("CERTIFICATE OF COMPLETION", W / 2, 170);
+
+    // Decorative line under title
+    ctx.strokeStyle = "rgba(0,212,255,0.2)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W / 2 - 160, 185); ctx.lineTo(W / 2 + 160, 185); ctx.stroke();
+
+    // "This certifies that"
+    ctx.font = "20px 'Georgia', serif";
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.fillText("This certifies that", W / 2, 250);
+
+    // Name
+    ctx.font = "bold 72px 'Georgia', serif";
+    const nameGrad = ctx.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
+    nameGrad.addColorStop(0, "#00d4ff");
+    nameGrad.addColorStop(1, "#a78bfa");
+    ctx.fillStyle = nameGrad;
+    ctx.fillText(name, W / 2, 340);
+
+    // Name underline
+    const nameWidth = ctx.measureText(name).width;
+    const underGrad = ctx.createLinearGradient(W / 2 - nameWidth / 2, 0, W / 2 + nameWidth / 2, 0);
+    underGrad.addColorStop(0, "transparent");
+    underGrad.addColorStop(0.5, "rgba(0,212,255,0.4)");
+    underGrad.addColorStop(1, "transparent");
+    ctx.strokeStyle = underGrad;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W / 2 - nameWidth / 2, 355); ctx.lineTo(W / 2 + nameWidth / 2, 355); ctx.stroke();
+
+    // "has successfully completed"
+    ctx.font = "20px 'Georgia', serif";
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.fillText("has successfully completed the", W / 2, 410);
+
+    // Course name
+    ctx.font = "bold 36px 'Arial'";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("Full Stack Web Development", W / 2, 460);
+
+    // Subtitle
+    ctx.font = "16px 'Arial'";
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    ctx.fillText("HTML · CSS · JavaScript", W / 2, 495);
+
+    // Track badges
+    const badges = [
+      { label: "HTML", color: "#e34c26", x: W / 2 - 180 },
+      { label: "CSS", color: "#264de4", x: W / 2 },
+      { label: "JavaScript", color: "#f7df1e", x: W / 2 + 180 },
+    ];
+    badges.forEach(b => {
+      ctx.fillStyle = `${b.color}22`;
+      ctx.strokeStyle = `${b.color}66`;
+      ctx.lineWidth = 1;
+      const bw = 120, bh = 36;
+      const bx = b.x - bw / 2, by = 530;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 18);
+      ctx.fill(); ctx.stroke();
+      ctx.font = "bold 13px 'Courier New'";
+      ctx.fillStyle = b.color;
+      ctx.fillText(b.label, b.x, by + 23);
+    });
+
+    // Bottom section
+    ctx.strokeStyle = "rgba(255,255,255,0.04)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(120, 640); ctx.lineTo(W - 120, 640); ctx.stroke();
+
+    // Date
+    const date = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+    ctx.font = "13px 'Courier New'";
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.textAlign = "left";
+    ctx.fillText(`Issued: ${date}`, 120, 690);
+
+    // Cert ID
+    const certId = `ENOVA-${(window._certUser?.uid || 'XXXXXXXX').slice(0,8).toUpperCase()}`;
+    ctx.textAlign = "right";
+    ctx.fillText(`ID: ${certId}`, W - 120, 690);
+
+    // ENOVA signature
+    ctx.textAlign = "center";
+    ctx.font = "bold 22px 'Georgia', serif";
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.fillText("ENOVA Dev", W / 2, 730);
+    ctx.font = "12px 'Courier New'";
+    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.fillText("AI-Powered Learning Platform", W / 2, 752);
+  }
+
+  window.downloadCertificate = function() {
+    const canvas = document.getElementById("certCanvas");
+    const link = document.createElement("a");
+    link.download = `ENOVA-Dev-Certificate-${(window._certUser?.displayName || "dev").replace(/\s/g, "-")}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    showToast("Certificate downloaded! 🎉", "success");
+  };
+
+  window.downloadPDF = function() {
+    const canvas = document.getElementById("certCanvas");
+    const imgData = canvas.toDataURL("image/png");
+    // Open image in new tab (user can print as PDF)
+    const win = window.open();
+    win.document.write(`<html><head><title>ENOVA Dev Certificate</title><style>body{margin:0;background:#000}img{width:100%;max-width:1200px;display:block;margin:auto}</style></head><body><img src="${imgData}"/><script>window.onload=()=>{window.print()}<\/script></body></html>`);
+    showToast("Opening print dialog for PDF...", "info");
+  };
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    const { signOut } = window._firebaseAuth || {};
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js").then(m => {
+      m.signOut(auth).then(() => { window.location.href = "index.html"; });
+    });
+  });
+  } // end initCertPage
+</script>
+</body>
+</html>
