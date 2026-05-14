@@ -1,15 +1,23 @@
 // api/chat.js — Vercel Serverless Function
-// Proxies requests to Groq API keeping key secret
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  // CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const key = process.env.GROQ_API_KEY;
+  if (!key) {
+    console.error("GROQ_API_KEY is not set");
+    return res.status(500).json({ error: "GROQ_API_KEY not configured on server" });
   }
 
   const { messages, systemPrompt } = req.body;
-
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: "Invalid messages" });
+    return res.status(400).json({ error: "Invalid messages array" });
   }
 
   try {
@@ -17,45 +25,34 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+        "Authorization": `Bearer ${key}`
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "system",
-            content: systemPrompt || `You are ENOVA Dev AI — a sharp, concise, and encouraging coding tutor specializing in HTML, CSS, and JavaScript. 
-            
-Your style:
-- Direct and practical, no fluff
-- Use simple examples
-- Point out mistakes gently but clearly
-- Never write the full solution — guide with hints
-- Use code snippets in backticks
-- Keep responses under 200 words unless a detailed explanation is needed
-- Celebrate wins with brief encouragement`
+            content: systemPrompt || "You are ENOVA Dev AI — a concise coding tutor for HTML, CSS and JavaScript beginners. Guide with hints, never give full solutions. Keep responses under 150 words."
           },
           ...messages
         ],
         max_tokens: 800,
-        temperature: 0.7,
-        stream: false
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Groq error:", err);
-      return res.status(500).json({ error: "AI service error" });
+      console.error("Groq API error:", err);
+      return res.status(500).json({ error: `Groq error: ${err}` });
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "No response";
-
+    const reply = data.choices?.[0]?.message?.content || "No response from AI";
     return res.status(200).json({ reply });
 
   } catch (error) {
-    console.error("API handler error:", error);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Handler error:", error.message);
+    return res.status(500).json({ error: error.message });
   }
 }
