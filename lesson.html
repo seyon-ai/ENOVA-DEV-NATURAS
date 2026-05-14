@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lesson — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/lesson.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="lesson-topbar">
+  <div class="lesson-topbar-left">
+    <a href="dashboard.html" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <a href="index.html" class="nav-logo" style="font-size:16px">ENOVA<span>.</span>dev</a>
+    <div class="lesson-breadcrumb">
+      <span id="trackLabel">HTML</span>
+      <span style="color:var(--text-3)">›</span>
+      <span id="lessonTitle">Loading...</span>
+    </div>
+  </div>
+  <div class="lesson-topbar-right">
+    <div class="lesson-xp-badge" id="lessonXP">+100 XP</div>
+    <button class="btn-primary run-btn" id="runBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Run
+    </button>
+    <button class="btn-ghost check-btn" id="checkBtn">Check Solution</button>
+    <a href="dashboard.html" class="btn-ghost" style="font-size:13px;padding:8px 16px;">Dashboard</a>
+  </div>
+</header>
+
+<!-- Main layout -->
+<div class="lesson-layout">
+
+  <!-- Left: Theory panel -->
+  <aside class="theory-panel">
+    <div class="theory-inner">
+      <div class="theory-badge" id="theoryObjective"></div>
+      <h2 class="theory-title" id="theoryLessonTitle">Loading...</h2>
+      <div class="theory-body" id="theoryBody"></div>
+      <div class="task-box">
+        <div class="task-header">
+          <span class="task-icon">🎯</span>
+          <span>Your Task</span>
+        </div>
+        <p class="task-desc" id="taskDesc">Loading task...</p>
+        <div class="hints-section" id="hintsSection"></div>
+      </div>
+      <div class="lesson-nav">
+        <button class="btn-ghost lesson-nav-btn" id="prevBtn">← Previous</button>
+        <button class="btn-primary lesson-nav-btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Center: Editor -->
+  <div class="editor-panel">
+    <div class="editor-topbar">
+      <div class="editor-tabs">
+        <div class="editor-tab active">index.html</div>
+      </div>
+      <div class="editor-actions">
+        <button class="editor-action-btn" id="resetBtn">↺ Reset</button>
+        <button class="editor-action-btn" id="copyBtn">⎘ Copy</button>
+      </div>
+    </div>
+    <textarea id="codeEditor"></textarea>
+  </div>
+
+  <!-- Right: Preview + AI -->
+  <div class="right-panel">
+    <div class="preview-panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-dot" style="background:var(--green)"></span>
+          Live Preview
+        </span>
+        <button class="editor-action-btn" id="refreshBtn">↺</button>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Preview"></iframe>
+      </div>
+    </div>
+
+    <div class="ai-panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-dot ai-dot"></span>
+          ENOVA AI Tutor
+        </span>
+        <button class="editor-action-btn" id="clearChatBtn">✕ Clear</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg ai-msg-bot">
+          <div class="ai-msg-avatar">AI</div>
+          <div class="ai-msg-bubble">
+            Hey! I'm your ENOVA AI tutor 👋<br/>
+            Ask me anything, or type <strong>/hint</strong> for a clue.
+          </div>
+        </div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInput" placeholder="Ask anything or type /hint..." type="text"/>
+        <button class="ai-send-btn" id="aiSendBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success modal -->
+<div class="modal-overlay" id="successModal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-icon">🎉</div>
+    <h2 class="modal-title">Lesson Complete!</h2>
+    <p class="modal-sub" id="modalSub">You earned XP!</p>
+    <div class="modal-xp" id="modalXP">+100 XP</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="modalNextBtn">Next Lesson →</button>
+      <a href="dashboard.html" class="btn-ghost">Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { auth, db } from "./js/firebase-config.js";
+
+  // ── Curriculum ──────────────────────────────────────────────────
+  const CURRICULUM = {
+    html: {
+      label: "HTML", color: "#e34c26",
+      levels: [
+        { id:"html-1", title:"What is HTML?", xp:100, objective:"Understand HTML structure and write your first webpage.", theory:`HTML (HyperText Markup Language) is the standard language for webpages. It uses <strong>tags</strong> wrapped in angle brackets. Every page has: DOCTYPE, html, head, and body.`, task:"Create a page with a heading, a paragraph, and your name in a &lt;strong&gt; tag.", hints:["Use &lt;h1&gt; for the main heading","Wrap your name in &lt;strong&gt;","Put content inside &lt;body&gt;"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <title>My First Page</title>\n  </head>\n  <body>\n    <!-- Write your code below -->\n\n  </body>\n</html>`, check:(c)=>c.includes("<h1")&&c.includes("<p")&&c.includes("<strong") },
+        { id:"html-2", title:"Headings & Paragraphs", xp:120, objective:"Use all 6 heading levels and paragraph tags.", theory:`HTML has 6 heading tags: <strong>&lt;h1&gt;</strong> through <strong>&lt;h6&gt;</strong>. h1 is largest/most important. <strong>&lt;p&gt;</strong> wraps paragraphs. Use <strong>&lt;br&gt;</strong> for line breaks and <strong>&lt;hr&gt;</strong> for horizontal rules.`, task:"Build a page with h1, h2, h3 headings and two paragraphs separated by a horizontal rule.", hints:["&lt;hr&gt; is self-closing","Only one &lt;h1&gt; per page","&lt;br&gt; creates a line break"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Headings</title></head>\n<body>\n  <!-- Add headings and paragraphs here -->\n\n</body>\n</html>`, check:(c)=>c.includes("<h1")&&c.includes("<h2")&&c.includes("<hr") },
+        { id:"html-3", title:"Links & Navigation", xp:150, objective:"Create hyperlinks that open in new tabs.", theory:`The <strong>&lt;a&gt;</strong> tag creates links. The <strong>href</strong> attribute sets the destination. Use <strong>target="_blank"</strong> to open in a new tab. Link to page sections with <strong>href="#id"</strong>.`, task:"Create 3 links: one to google.com (new tab), one to github.com, and one that jumps to a section with id='about'.", hints:["target=\"_blank\" opens new tab","Add rel=\"noopener\" for security","Sections need an id attribute"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Links</title></head>\n<body>\n  <!-- Navigation links -->\n\n  <section id="about">\n    <h2>About</h2>\n  </section>\n</body>\n</html>`, check:(c)=>c.includes('href="https://')&&c.includes('target="_blank"') },
+        { id:"html-4", title:"Images & Media", xp:150, objective:"Embed images with proper alt text.", theory:`<strong>&lt;img&gt;</strong> embeds images. Always include an <strong>alt</strong> attribute for accessibility. Use <strong>&lt;figure&gt;</strong> and <strong>&lt;figcaption&gt;</strong> for semantic context.`, task:"Add an image with alt text, wrap it in a figure with a caption, and set width to 300px.", hints:["img is self-closing","alt text describes the image","figcaption goes inside figure"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Images</title></head>\n<body>\n  <!-- Add your image inside a figure here -->\n\n</body>\n</html>`, check:(c)=>c.includes("<figure")&&c.includes("alt=")&&c.includes("<figcaption") },
+        { id:"html-5", title:"Lists", xp:120, objective:"Create ordered, unordered, and nested lists.", theory:`<strong>&lt;ul&gt;</strong> creates bullet lists. <strong>&lt;ol&gt;</strong> creates numbered lists. Both use <strong>&lt;li&gt;</strong> for items. Lists can be nested inside each other.`, task:"Build a recipe page with an ingredients list (unordered) and cooking steps (ordered), with at least one nested list.", hints:["Nest a &lt;ul&gt; inside an &lt;li&gt;","ol items are automatically numbered","Use ul for ingredients, ol for steps"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Lists</title></head>\n<body>\n  <h1>My Recipe</h1>\n  <!-- Add your lists here -->\n\n</body>\n</html>`, check:(c)=>c.includes("<ul")&&c.includes("<ol")&&c.includes("<li") },
+        { id:"html-6", title:"Tables", xp:180, objective:"Build structured data tables.", theory:`Tables use <strong>&lt;table&gt;</strong>, <strong>&lt;thead&gt;</strong>, <strong>&lt;tbody&gt;</strong>, <strong>&lt;tr&gt;</strong> (row), <strong>&lt;th&gt;</strong> (header), <strong>&lt;td&gt;</strong> (data). Use colspan to merge cells.`, task:"Create a schedule table with days as columns and time slots as rows. Merge at least one cell.", hints:["thead contains the header row","tbody contains data rows","colspan merges columns"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Tables</title></head>\n<body>\n  <table border="1">\n    <caption>Weekly Schedule</caption>\n    <!-- Add thead and tbody here -->\n\n  </table>\n</body>\n</html>`, check:(c)=>c.includes("<thead")&&c.includes("<tbody")&&c.includes("colspan") },
+        { id:"html-7", title:"Forms & Inputs", xp:200, objective:"Build a complete form with validation.", theory:`<strong>&lt;form&gt;</strong> collects user input. Use <strong>&lt;label&gt;</strong> with <strong>for</strong> matching input <strong>id</strong>. Input types: text, email, password, number, checkbox, radio. Add <strong>required</strong> for validation.`, task:"Build a registration form with: name (required), email (required), password (min 8 chars), age (number), and a terms checkbox.", hints:["label for= must match input id=","type=\"email\" validates email format","required prevents empty submission"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Forms</title></head>\n<body>\n  <form action="#" method="POST">\n    <h2>Register</h2>\n    <!-- Add your form fields here -->\n    <button type="submit">Create Account</button>\n  </form>\n</body>\n</html>`, check:(c)=>c.includes('type="email"')&&c.includes('required')&&c.includes('type="checkbox"') },
+        { id:"html-8", title:"Semantic HTML", xp:200, objective:"Structure a webpage using semantic HTML5 elements.", theory:`Semantic elements describe their meaning. Use: <strong>&lt;header&gt;</strong>, <strong>&lt;nav&gt;</strong>, <strong>&lt;main&gt;</strong>, <strong>&lt;article&gt;</strong>, <strong>&lt;section&gt;</strong>, <strong>&lt;aside&gt;</strong>, <strong>&lt;footer&gt;</strong> instead of generic divs.`, task:"Rebuild a blog page layout using only semantic elements — no divs for structure.", hints:["header = top of page","nav = navigation links","article = self-contained content"], starterCode:`<!DOCTYPE html>\n<html lang="en">\n<head><title>Semantic HTML</title></head>\n<body>\n  <!-- Use: header, nav, main, article, aside, footer -->\n\n</body>\n</html>`, check:(c)=>c.includes("<header")&&c.includes("<main")&&c.includes("<footer")&&c.includes("<nav") }
+      ]
+    },
+    css: {
+      label: "CSS", color: "#264de4",
+      levels: [
+        { id:"css-1", title:"Selectors & Properties", xp:100, objective:"Apply styles using element, class, and ID selectors.", theory:`CSS styles HTML. Selectors target elements: <strong>element</strong> (p), <strong>class</strong> (.name), <strong>ID</strong> (#name). Written as: <code>selector { property: value; }</code>`, task:"Style a page: body background #111, h1 color cyan, paragraph font-size 18px, and a .highlight class with yellow background.", hints:["Color names or hex values work","font-size uses px, rem, em","background-color or background shorthand"], starterCode:`<!DOCTYPE html>\n<html>\n<head>\n<style>\n  /* Write your CSS here */\n\n</style>\n</head>\n<body>\n  <h1>Styled Page</h1>\n  <p>Regular paragraph</p>\n  <p class="highlight">Highlighted</p>\n</body>\n</html>`, check:(c)=>c.includes("background")&&c.includes("color")&&c.includes(".highlight") },
+        { id:"css-2", title:"Box Model", xp:150, objective:"Understand margin, padding, border, and box-sizing.", theory:`Every element is a box: <strong>content → padding → border → margin</strong>. Use <strong>box-sizing: border-box</strong> to include padding and border in width. Margin collapses between vertical elements.`, task:"Create 3 boxes each 200px wide with 20px padding, 2px border, different margins, and box-sizing: border-box.", hints:["box-sizing: border-box is best practice","margin: auto centers block elements","border shorthand: width style color"], starterCode:`<!DOCTYPE html>\n<html>\n<head>\n<style>\n  * { box-sizing: border-box; }\n  /* Style your boxes */\n\n</style>\n</head>\n<body>\n  <div class="box">Box 1</div>\n  <div class="box">Box 2</div>\n  <div class="box">Box 3</div>\n</body>\n</html>`, check:(c)=>c.includes("padding")&&c.includes("border")&&c.includes("margin") },
+        { id:"css-3", title:"Flexbox", xp:200, objective:"Build flexible layouts with Flexbox.", theory:`Set <strong>display: flex</strong> on a container. Key properties: <strong>flex-direction</strong>, <strong>justify-content</strong> (main axis), <strong>align-items</strong> (cross axis), <strong>gap</strong>, <strong>flex-wrap</strong>.`, task:"Build a nav bar (logo left, links right) and a 3-card row — all using flexbox.", hints:["justify-content: space-between spreads items","align-items: center vertically centers","flex: 1 makes items grow equally"], starterCode:`<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { margin: 0; background: #111; color: white; font-family: sans-serif; }\n  /* Add flexbox styles */\n\n</style>\n</head>\n<body>\n  <nav>\n    <div class="logo">ENOVA</div>\n    <div class="links"><a href="#">Home</a><a href="#">About</a></div>\n  </nav>\n  <div class="cards">\n    <div class="card">Card 1</div>\n    <div class="card">Card 2</div>\n    <div class="card">Card 3</div>\n  </div>\n</body>\n</html>`, check:(c)=>c.includes("display: flex")&&c.includes("justify-content") },
+        { id:"css-4", title:"CSS Grid", xp:220, objective:"Create complex 2D layouts with CSS Grid.", theory:`<strong>display: grid</strong> on container. <strong>grid-template-columns</strong> defines columns. Items can span cells with <strong>grid-column</strong> and <strong>grid-row</strong>.`, task:"Build a magazine layout: full-width header, 2-col content area (main + sidebar), full-width footer.", hints:["grid-template-columns: 2fr 1fr splits 2:1","grid-column: 1 / -1 spans full width","Use gap for spacing"], starterCode:`<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { margin: 0; font-family: sans-serif; }\n  .layout {\n    display: grid;\n    /* Define your grid */\n    min-height: 100vh;\n  }\n  header, footer { background: #333; color: white; padding: 20px; }\n  main { background: #f0f0f0; padding: 20px; }\n  aside { background: #ddd; padding: 20px; }\n</style>\n</head>\n<body>\n  <div class="layout">\n    <header>Header</header>\n    <main>Main Content</main>\n    <aside>Sidebar</aside>\n    <footer>Footer</footer>\n  </div>\n</body>\n</html>`, check:(c)=>c.includes("display: grid")&&c.includes("grid-template") },
+        { id:"css-5", title:"Animations", xp:220, objective:"Add smooth transitions and keyframe animations.", theory:`<strong>transition</strong> animates property changes. <strong>@keyframes</strong> define animation sequences. <strong>animation</strong> applies them. Use <code>animation-iteration-count: infinite</code> to loop.`, task:"Create a button that changes color on hover (transition), and a pulsing circle animation.", hints:["transition: all 0.3s ease is a good default","@keyframes uses 0%/100% or from/to","animation-iteration-count: infinite loops"], starterCode:`<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 60px; background: #111; }\n  .btn { padding: 12px 28px; background: #00d4ff; color: #000; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }\n  .circle { width: 80px; height: 80px; border-radius: 50%; background: #7c3aed; }\n  /* Add transitions and @keyframes */\n\n</style>\n</head>\n<body>\n  <button class="btn">Hover Me</button>\n  <div class="circle"></div>\n</body>\n</html>`, check:(c)=>c.includes("transition")&&c.includes("@keyframes")&&c.includes("animation") },
+        { id:"css-6", title:"Responsive Design", xp:250, objective:"Build layouts that work on all screen sizes.", theory:`Use <strong>media queries</strong>: <code>@media (max-width: 768px) { }</code>. Mobile-first means writing base styles for mobile first. Use relative units: %, rem, vw, vh instead of fixed px.`, task:"Build a 3-column card grid that collapses to 1 column on mobile (under 768px).", hints:["Start with mobile styles first","max-width targets maximum screen size","grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) is responsive by default"], starterCode:`<!DOCTYPE html>\n<html>\n<head>\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<style>\n  body { margin: 0; padding: 20px; font-family: sans-serif; background: #111; color: white; }\n  .grid { /* Add responsive grid */ }\n  .card { background: #1e1e2e; padding: 24px; border-radius: 12px; }\n  /* Add media query */\n\n</style>\n</head>\n<body>\n  <div class="grid">\n    <div class="card">Card 1</div>\n    <div class="card">Card 2</div>\n    <div class="card">Card 3</div>\n  </div>\n</body>\n</html>`, check:(c)=>c.includes("@media")&&c.includes("max-width") }
+      ]
+    },
+    js: {
+      label: "JavaScript", color: "#f7df1e",
+      levels: [
+        { id:"js-1", title:"Variables & Data Types", xp:100, objective:"Declare variables and understand JavaScript's primitive types.", theory:`JavaScript has 3 variable declarations: <strong>var</strong> (avoid), <strong>let</strong> (reassignable), <strong>const</strong> (constant). Types: string, number, boolean, null, undefined. Template literals use backticks: <code>\`Hello \${name}\`</code>`, task:"Declare variables for a user profile (name, age, isStudent, score), log them, and display in HTML using template literals.", hints:["const for values that won't change","let for values that will change","Template literals: \`Hello \${name}\`"], starterCode:`<!DOCTYPE html>\n<html>\n<body>\n  <div id="output"></div>\n  <script>\n    // Declare your variables here\n    const name = "Your Name";\n\n    // Display them in #output\n    document.getElementById('output').innerHTML = \`Name: \${name}\`;\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("const")&&c.includes("let")&&c.includes("getElementById") },
+        { id:"js-2", title:"Functions", xp:150, objective:"Write regular functions, arrow functions, and understand parameters.", theory:`Functions encapsulate reusable logic. <strong>Arrow functions</strong> are shorter: <code>const fn = (param) => value</code>. Functions can have <strong>default parameters</strong>. Use <strong>return</strong> to send a value back.`, task:"Write 3 functions: a greet function, an add function, and an arrow function that squares a number.", hints:["Arrow functions: const fn = (x) => x * 2","Default params: function greet(name = 'World')","Return sends a value back to the caller"], starterCode:`<!DOCTYPE html>\n<html>\n<body>\n  <div id="output"></div>\n  <script>\n    // 1. Regular function: greet(name)\n    function greet(name) {\n      return "Hello, " + name;\n    }\n\n    // 2. Regular function: add(a, b)\n\n    // 3. Arrow function: square(n)\n\n    document.getElementById('output').innerHTML = greet("World");\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("function")&&c.includes("=>")&&c.includes("return") },
+        { id:"js-3", title:"DOM Manipulation", xp:200, objective:"Select, modify, and create HTML elements with JavaScript.", theory:`The DOM is JS's interface to HTML. Select: <strong>querySelector</strong>, <strong>getElementById</strong>. Modify: <strong>textContent</strong>, <strong>innerHTML</strong>, <strong>classList</strong>. Create: <strong>createElement</strong> + <strong>appendChild</strong>.`, task:"Build a dynamic list: input field + button that adds items to a ul. Items should be removable on click.", hints:["createElement creates a new element","appendChild adds it to the DOM","addEventListener listens for events"], starterCode:`<!DOCTYPE html>\n<html>\n<head><style>body{font-family:sans-serif;padding:20px}li{cursor:pointer;padding:8px;margin:4px 0;background:#f0f0f0;border-radius:4px}li:hover{background:#ffcccc}</style></head>\n<body>\n  <input id="itemInput" placeholder="Add item..."/>\n  <button id="addBtn">Add</button>\n  <ul id="list"></ul>\n  <script>\n    // Write DOM manipulation here\n    document.getElementById('addBtn').addEventListener('click', function() {\n      // Add your code\n    });\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("createElement")&&c.includes("addEventListener")&&c.includes("appendChild") },
+        { id:"js-4", title:"Events", xp:180, objective:"Handle user events: clicks, keyboard, and mouse events.", theory:`Events fire when users interact. Use <strong>addEventListener(event, callback)</strong>. Common events: click, keydown, keyup, mouseover, submit, input. The <strong>event object</strong> has info like event.target, event.key.`, task:"Build a color picker: clicking colored buttons changes the page background. Add a keyboard shortcut (press 'r' to reset).", hints:["event.target is the clicked element","event.key gives the pressed key","document.body.style.background sets background"], starterCode:`<!DOCTYPE html>\n<html>\n<head><style>body{transition:background 0.3s;padding:40px;font-family:sans-serif}.btn{width:50px;height:50px;border:none;border-radius:50%;cursor:pointer;margin:8px}</style></head>\n<body>\n  <h2>Click a color or press 'R' to reset</h2>\n  <button class="btn" style="background:#00d4ff" data-color="#00d4ff"></button>\n  <button class="btn" style="background:#7c3aed" data-color="#7c3aed"></button>\n  <button class="btn" style="background:#f59e0b" data-color="#f59e0b"></button>\n  <script>\n    // Add event listeners here\n\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("addEventListener")&&c.includes("click")&&c.includes("keydown") },
+        { id:"js-5", title:"Arrays & Loops", xp:200, objective:"Work with arrays using loops and array methods.", theory:`Arrays store ordered data. Functional methods: <strong>map</strong> (transform), <strong>filter</strong> (select), <strong>find</strong>, <strong>reduce</strong>, <strong>forEach</strong>. These return new arrays without modifying the original.`, task:"Given an array of products, display only those under $50 using filter(), then display names in uppercase using map().", hints:["filter() returns a new array of matching items","map() transforms each item","Combine: array.filter(...).map(...)"], starterCode:`<!DOCTYPE html>\n<html>\n<body>\n  <div id="output"></div>\n  <script>\n    const products = [\n      { name: "Keyboard", price: 79 },\n      { name: "Mouse", price: 35 },\n      { name: "Monitor", price: 299 },\n      { name: "Headset", price: 45 },\n      { name: "USB Hub", price: 25 }\n    ];\n\n    // 1. Filter products under $50\n    const affordable = products.filter(p => p.price < 50);\n\n    // 2. Map to uppercase names\n\n    // 3. Display results\n    document.getElementById('output').innerHTML = affordable.map(p => p.name).join(', ');\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes(".filter(")&&c.includes(".map(") },
+        { id:"js-6", title:"Objects", xp:200, objective:"Create and manipulate objects, and understand destructuring.", theory:`Objects store key-value pairs. Access with <strong>dot notation</strong> (obj.key). <strong>Destructuring</strong>: <code>const { name, age } = user</code>. <strong>Spread operator</strong>: <code>{ ...obj, newProp: val }</code>. Methods are functions inside objects.`, task:"Create a student object with methods (greet, getGrade). Destructure its properties and display a profile card.", hints:["Methods: { greet() { return ... } }","Destructure: const { name, grade } = student","Spread to copy: { ...student, updated: true }"], starterCode:`<!DOCTYPE html>\n<html>\n<body>\n  <div id="profile"></div>\n  <script>\n    const student = {\n      name: "Alex",\n      age: 20,\n      grade: 92,\n      greet() {\n        return "Hi, I'm " + this.name;\n      },\n      // Add getGrade() method\n    };\n\n    // Destructure and display\n    const { name, age } = student;\n    document.getElementById('profile').innerHTML = \`\${name} - Age: \${age}\`;\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("greet")&&c.includes("const {") },
+        { id:"js-7", title:"Fetch & APIs", xp:280, objective:"Fetch data from a public API and display it dynamically.", theory:`<strong>fetch()</strong> makes HTTP requests and returns a Promise. Use <strong>async/await</strong> for clean syntax. Always handle errors with <strong>try/catch</strong>. Parse JSON with <strong>response.json()</strong>.`, task:"Fetch 5 random users from https://randomuser.me/api/?results=5 and display their photo, name, and email in cards.", hints:["fetch() is async, always await it","await response.json() parses the data","Wrap in try/catch to handle errors"], starterCode:`<!DOCTYPE html>\n<html>\n<head><style>body{font-family:sans-serif;padding:20px;background:#111;color:white}.users{display:flex;flex-wrap:wrap;gap:16px}.card{background:#1e1e2e;padding:20px;border-radius:12px;text-align:center;width:160px}.card img{border-radius:50%;width:80px}</style></head>\n<body>\n  <h1>Random Users</h1>\n  <div id="loading" style="color:#00d4ff">Loading...</div>\n  <div class="users" id="users"></div>\n  <script>\n    async function fetchUsers() {\n      try {\n        // Fetch from https://randomuser.me/api/?results=5\n\n      } catch(e) {\n        document.getElementById('loading').textContent = 'Error: ' + e.message;\n      }\n    }\n    fetchUsers();\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("fetch(")&&c.includes("await")&&c.includes(".json()") },
+        { id:"js-8", title:"Local Storage", xp:220, objective:"Persist data in the browser with localStorage.", theory:`<strong>localStorage</strong> stores data that survives page refreshes. Methods: <strong>setItem(key, value)</strong>, <strong>getItem(key)</strong>, <strong>removeItem(key)</strong>. Always <strong>JSON.stringify()</strong> objects before saving, <strong>JSON.parse()</strong> when reading.`, task:"Build a notes app: textarea + save button. Notes persist after refresh. Show saved notes with delete buttons.", hints:["JSON.stringify() converts objects to strings","JSON.parse() converts strings back","Load saved notes on page load with DOMContentLoaded"], starterCode:`<!DOCTYPE html>\n<html>\n<head><style>body{font-family:sans-serif;padding:20px;max-width:500px}textarea{width:100%;height:100px;margin-bottom:8px;padding:12px;box-sizing:border-box}.note{background:#f5f5f5;padding:12px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between}</style></head>\n<body>\n  <h2>My Notes</h2>\n  <textarea id="noteInput" placeholder="Write a note..."></textarea>\n  <button id="saveBtn">Save Note</button>\n  <div id="notesList"></div>\n  <script>\n    // Implement notes with localStorage\n    // Load notes on page load\n    // Save note on button click\n    // Show notes with delete buttons\n  <\/script>\n</body>\n</html>`, check:(c)=>c.includes("localStorage")&&c.includes("JSON.stringify")&&c.includes("JSON.parse") }
+      ]
+    }
+  };
+
+  const TRACKS = ["html","css","js"];
+
+  function getAllLessons() {
+    return TRACKS.flatMap(t => CURRICULUM[t].levels);
+  }
+
+  function getLessonById(id) {
+    for (const t of TRACKS) {
+      const l = CURRICULUM[t].levels.find(l => l.id === id);
+      if (l) return l;
+    }
+    return null;
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────
+  function showToast(msg, type = "info") {
+    const icons = { success:"✓", error:"✕", info:"◈" };
+    const c = document.getElementById("toastContainer");
+    const t = document.createElement("div");
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity="0"; t.style.transform="translateX(100%)"; t.style.transition="all 0.3s"; setTimeout(()=>t.remove(),300); }, 3500);
+  }
+
+  // ── State ──────────────────────────────────────────────────────
+  let editor = null;
+  let currentLesson = null;
+  let currentUser = null;
+  let userProfile = null;
+  let completedLessons = [];
+  let aiHistory = [];
+  let isAISending = false;
+
+  // ── Auth guard ─────────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "login.html"; return; }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      userProfile = snap.exists() ? snap.data() : {};
+      completedLessons = userProfile.completedLessons || [];
+    } catch(e) {
+      completedLessons = [];
+    }
+    initPage();
+  });
+
+  // ── Init page ──────────────────────────────────────────────────
+  function initPage() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id") || "html-1";
+    const lesson = getLessonById(id) || getLessonById("html-1");
+    loadLesson(lesson);
+    bindButtons();
+  }
+
+  // ── Bind all buttons ───────────────────────────────────────────
+  function bindButtons() {
+    document.getElementById("runBtn").addEventListener("click", runCode);
+    document.getElementById("checkBtn").addEventListener("click", checkSolution);
+    document.getElementById("resetBtn").addEventListener("click", resetCode);
+    document.getElementById("copyBtn").addEventListener("click", copyCode);
+    document.getElementById("refreshBtn").addEventListener("click", runCode);
+    document.getElementById("prevBtn").addEventListener("click", goPrev);
+    document.getElementById("nextBtn").addEventListener("click", goNext);
+    document.getElementById("aiSendBtn").addEventListener("click", sendAI);
+    document.getElementById("clearChatBtn").addEventListener("click", clearChat);
+    document.getElementById("modalNextBtn").addEventListener("click", goNext);
+    document.getElementById("aiInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendAI(); });
+  }
+
+  // ── Load lesson ────────────────────────────────────────────────
+  function loadLesson(lesson) {
+    currentLesson = lesson;
+    const trackKey = lesson.id.split("-")[0];
+    const track = CURRICULUM[trackKey];
+
+    document.getElementById("trackLabel").textContent = track.label;
+    document.getElementById("lessonTitle").textContent = lesson.title;
+    document.getElementById("theoryLessonTitle").textContent = lesson.title;
+    document.getElementById("theoryObjective").textContent = lesson.objective;
+    document.getElementById("theoryBody").innerHTML = lesson.theory;
+    document.getElementById("taskDesc").textContent = lesson.task;
+    document.getElementById("lessonXP").textContent = `+${lesson.xp} XP`;
+    document.getElementById("modalSub").textContent = `You earned +${lesson.xp} XP`;
+    document.getElementById("modalXP").textContent = `+${lesson.xp} XP`;
+    document.title = `${lesson.title} — ENOVA Dev`;
+
+    // Hints
+    document.getElementById("hintsSection").innerHTML =
+      lesson.hints.map(h => `<div class="hint-item">💡 ${h}</div>`).join("");
+
+    // Prev/Next state
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === lesson.id);
+    document.getElementById("prevBtn").disabled = idx === 0;
+    document.getElementById("nextBtn").textContent = idx === all.length - 1 ? "Finish 🎓" : "Next →";
+
+    // Completed state
+    if (completedLessons.includes(lesson.id)) {
+      document.getElementById("checkBtn").textContent = "✓ Completed";
+      document.getElementById("checkBtn").style.borderColor = "var(--green)";
+      document.getElementById("checkBtn").style.color = "var(--green)";
+    } else {
+      document.getElementById("checkBtn").textContent = "Check Solution";
+      document.getElementById("checkBtn").style.borderColor = "";
+      document.getElementById("checkBtn").style.color = "";
+    }
+
+    initEditor(lesson.starterCode);
+    window.history.replaceState({}, "", `?id=${lesson.id}`);
+  }
+
+  // ── Editor ─────────────────────────────────────────────────────
+  function initEditor(code) {
+    if (editor) {
+      editor.setValue(code);
+      editor.refresh();
+      setTimeout(runCode, 300);
+      return;
+    }
+    editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
+      mode: "htmlmixed",
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseTags: true,
+      indentUnit: 2,
+      tabSize: 2,
+      lineWrapping: true,
+      readOnly: false,
+      autofocus: false,
+      extraKeys: { "Ctrl-Enter": runCode, "Cmd-Enter": runCode }
+    });
+    editor.setValue(code);
+    editor.on("change", () => {
+      clearTimeout(window._autoRun);
+      window._autoRun = setTimeout(runCode, 1000);
+    });
+    setTimeout(() => { editor.refresh(); runCode(); }, 200);
+  }
+
+  function runCode() {
+    if (!editor) return;
+    const code = editor.getValue();
+    const frame = document.getElementById("previewFrame");
+    try {
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      doc.open(); doc.write(code); doc.close();
+    } catch(e) { console.warn("Preview error:", e); }
+  }
+
+  function resetCode() {
+    if (!currentLesson) return;
+    if (confirm("Reset to starter code?")) {
+      editor.setValue(currentLesson.starterCode);
+      runCode();
+    }
+  }
+
+  function copyCode() {
+    navigator.clipboard.writeText(editor.getValue()).then(() => showToast("Code copied!", "success"));
+  }
+
+  // ── Check solution ─────────────────────────────────────────────
+  async function checkSolution() {
+    if (!currentLesson || !currentUser) return;
+    const code = editor.getValue();
+    if (currentLesson.check && !currentLesson.check(code)) {
+      showToast("Not quite! Check the hints or ask the AI tutor.", "error");
+      return;
+    }
+    try {
+      const ref = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      const done = data.completedLessons || [];
+      if (!done.includes(currentLesson.id)) {
+        const newDone = [...done, currentLesson.id];
+        const newXP = (data.xp || 0) + currentLesson.xp;
+        await setDoc(ref, { completedLessons: newDone, xp: newXP, level: Math.floor(newXP/500)+1, lastActiveDate: serverTimestamp() }, { merge: true });
+        completedLessons = newDone;
+      }
+      document.getElementById("successModal").style.display = "flex";
+      document.getElementById("checkBtn").textContent = "✓ Completed";
+      document.getElementById("checkBtn").style.borderColor = "var(--green)";
+      document.getElementById("checkBtn").style.color = "var(--green)";
+      showToast(`+${currentLesson.xp} XP earned! 🎉`, "success");
+    } catch(e) {
+      showToast("Progress saved locally!", "success");
+      document.getElementById("successModal").style.display = "flex";
+    }
+  }
+
+  // ── Navigation ─────────────────────────────────────────────────
+  function goPrev() {
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === currentLesson.id);
+    if (idx > 0) loadLesson(all[idx - 1]);
+  }
+
+  function goNext() {
+    document.getElementById("successModal").style.display = "none";
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === currentLesson.id);
+    if (idx < all.length - 1) loadLesson(all[idx + 1]);
+    else window.location.href = "certificate.html";
+  }
+
+  // ── AI Tutor ───────────────────────────────────────────────────
+  function addMessage(text, role) {
+    const container = document.getElementById("aiMessages");
+    const wrap = document.createElement("div");
+    wrap.className = `ai-msg ai-msg-${role === "bot" ? "bot" : "user"}`;
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/`(.*?)`/g, "<code>$1</code>")
+      .replace(/\n/g, "<br/>");
+    if (role === "bot") {
+      wrap.innerHTML = `<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble">${formatted}</div>`;
+    } else {
+      wrap.innerHTML = `<div class="ai-msg-bubble ai-msg-user-bubble">${formatted}</div>`;
+    }
+    container.appendChild(wrap);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function sendAI() {
+    if (isAISending) return;
+    const input = document.getElementById("aiInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = "";
+
+    // /hint shortcut
+    if (msg.toLowerCase() === "/hint") {
+      addMessage("/hint", "user");
+      const h = currentLesson.hints[Math.floor(Math.random() * currentLesson.hints.length)];
+      addMessage(`Here's a hint 💡\n\n**${h}**`, "bot");
+      return;
+    }
+
+    addMessage(msg, "user");
+    aiHistory.push({ role:"user", content: msg });
+
+    // Typing indicator
+    const container = document.getElementById("aiMessages");
+    const typing = document.createElement("div");
+    typing.id = "typing";
+    typing.className = "ai-msg ai-msg-bot";
+    typing.innerHTML = `<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+    container.appendChild(typing);
+    container.scrollTop = container.scrollHeight;
+
+    isAISending = true;
+    document.getElementById("aiSendBtn").disabled = true;
+
+    const code = editor ? editor.getValue() : "";
+    const systemPrompt = `You are ENOVA Dev AI, a concise and encouraging coding tutor for beginners learning HTML, CSS and JavaScript.\n\nCurrent lesson: "${currentLesson?.title}"\nObjective: ${currentLesson?.objective}\nTask: ${currentLesson?.task}\n\nStudent's code:\n\`\`\`html\n${code}\n\`\`\`\n\nRules: Be concise (under 150 words). Never give the full solution — guide with hints. Use backticks for code. Be encouraging.`;
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemPrompt, messages: aiHistory })
+      });
+      const data = await res.json();
+      typing.remove();
+      const reply = data.reply || data.error || "Sorry, something went wrong.";
+      aiHistory.push({ role:"assistant", content: reply });
+      addMessage(reply, "bot");
+    } catch(e) {
+      typing.remove();
+      addMessage(`Error: ${e.message || "Connection failed"}. Check Vercel logs for details.`, "bot");
+    }
+
+    isAISending = false;
+    document.getElementById("aiSendBtn").disabled = false;
+  }
+
+  function clearChat() {
+    document.getElementById("aiMessages").innerHTML = "";
+    aiHistory = [];
+    addMessage("Chat cleared! Ask me anything about this lesson 👋", "bot");
+  }
+</script>
+</body>
+</html>
