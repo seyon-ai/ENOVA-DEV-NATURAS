@@ -9,12 +9,12 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDVrBKlX1ie6vOrQI5T1qgjQUTU7u5TVI4",
+  authDomain: "enova-dev.firebaseapp.com",
+  projectId: "enova-dev",
+  storageBucket: "enova-dev.firebasestorage.app",
+  messagingSenderId: "334200976325",
+  appId: "1:334200976325:web:0910cada66fddc10d451ac"
 };
 
 const app = initializeApp(firebaseConfig);
