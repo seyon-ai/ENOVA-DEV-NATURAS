@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lesson — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/lesson.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+</head>
+<body>
+
+<header class="lesson-topbar">
+  <div class="lesson-topbar-left">
+    <a href="dashboard.html" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <a href="index.html" class="nav-logo" style="font-size:16px">ENOVA<span>.</span>dev</a>
+    <div class="lesson-breadcrumb">
+      <span id="trackLabel">HTML</span>
+      <span style="color:var(--text-3)">›</span>
+      <span id="lessonTitle">Loading...</span>
+    </div>
+  </div>
+  <div class="lesson-topbar-right">
+    <div class="lesson-xp-badge" id="lessonXP">+100 XP</div>
+    <button class="btn-primary run-btn" id="runBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Run
+    </button>
+    <button class="btn-ghost check-btn" id="checkBtn">Check Solution</button>
+    <a href="dashboard.html" class="btn-ghost" style="font-size:13px;padding:8px 16px;">Dashboard</a>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="theory-panel">
+    <div class="theory-inner">
+      <div class="theory-badge" id="theoryObjective"></div>
+      <h2 class="theory-title" id="theoryLessonTitle">Loading...</h2>
+      <div class="theory-body" id="theoryBody"></div>
+      <div class="task-box">
+        <div class="task-header"><span class="task-icon">🎯</span><span>Your Task</span></div>
+        <p class="task-desc" id="taskDesc">Loading task...</p>
+        <div class="hints-section" id="hintsSection"></div>
+      </div>
+      <div class="lesson-nav">
+        <button class="btn-ghost lesson-nav-btn" id="prevBtn">← Previous</button>
+        <button class="btn-primary lesson-nav-btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="editor-panel">
+    <div class="editor-topbar">
+      <div class="editor-tabs"><div class="editor-tab active">index.html</div></div>
+      <div class="editor-actions">
+        <button class="editor-action-btn" id="resetBtn">↺ Reset</button>
+        <button class="editor-action-btn" id="copyBtn">⎘ Copy</button>
+      </div>
+    </div>
+    <textarea id="codeEditor"></textarea>
+  </div>
+
+  <div class="right-panel">
+    <div class="preview-panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="panel-dot" style="background:var(--green)"></span>Live Preview</span>
+        <button class="editor-action-btn" id="refreshBtn">↺</button>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Preview"></iframe>
+      </div>
+    </div>
+    <div class="ai-panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="panel-dot ai-dot"></span>ENOVA AI Tutor</span>
+        <button class="editor-action-btn" id="clearChatBtn">✕ Clear</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg ai-msg-bot">
+          <div class="ai-msg-avatar">AI</div>
+          <div class="ai-msg-bubble">Hey! I'm your ENOVA AI tutor 👋<br/>Ask me anything, or type <strong>/hint</strong> for a clue. I can also write code directly into your editor!</div>
+        </div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInput" placeholder="Ask anything or type /hint..." type="text"/>
+        <button class="ai-send-btn" id="aiSendBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="successModal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-icon">🎉</div>
+    <h2 class="modal-title">Lesson Complete!</h2>
+    <p class="modal-sub" id="modalSub">You earned XP!</p>
+    <div class="modal-xp" id="modalXP">+100 XP</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="modalNextBtn">Next Lesson →</button>
+      <a href="dashboard.html" class="btn-ghost">Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { CURRICULUM } from "./js/curriculum.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── Curriculum helpers ──────────────────────────────────────────
+  const TRACKS = ["html","css","js"];
+
+  function getAllLessons() {
+    return TRACKS.flatMap(t => CURRICULUM[t].levels);
+  }
+
+  function getLessonById(id) {
+    for (const t of TRACKS) {
+      const l = CURRICULUM[t].levels.find(l => l.id === id);
+      if (l) return l;
+    }
+    return null;
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────
+  function toast(msg, type) {
+    const c = document.getElementById("toastContainer");
+    const t = document.createElement("div");
+    t.className = "toast toast-" + (type||"info");
+    t.innerHTML = "<span>" + msg + "</span>";
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity="0"; t.style.transition="opacity 0.3s"; setTimeout(()=>t.remove(),300); }, 3500);
+  }
+
+  // ── State ──────────────────────────────────────────────────────
+  let editor = null;
+  let currentLesson = null;
+  let currentUser = null;
+  let completedLessons = [];
+  let aiHistory = [];
+  let aiSending = false;
+
+  // ── Auth ───────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "login.html"; return; }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) completedLessons = snap.data().completedLessons || [];
+    } catch(e) { console.warn(e); }
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id") || "html-1";
+    loadLesson(getLessonById(id) || getLessonById("html-1"));
+    bindAll();
+  });
+
+  // ── Bind buttons ───────────────────────────────────────────────
+  function bindAll() {
+    document.getElementById("runBtn").onclick = runCode;
+    document.getElementById("checkBtn").onclick = checkSolution;
+    document.getElementById("resetBtn").onclick = resetCode;
+    document.getElementById("copyBtn").onclick = copyCode;
+    document.getElementById("refreshBtn").onclick = runCode;
+    document.getElementById("prevBtn").onclick = goPrev;
+    document.getElementById("nextBtn").onclick = goNext;
+    document.getElementById("modalNextBtn").onclick = goNext;
+    document.getElementById("aiSendBtn").onclick = sendAI;
+    document.getElementById("clearChatBtn").onclick = clearChat;
+    document.getElementById("aiInput").onkeydown = e => { if (e.key === "Enter") sendAI(); };
+  }
+
+  // ── Load lesson ────────────────────────────────────────────────
+  function loadLesson(lesson) {
+    currentLesson = lesson;
+    const trackKey = lesson.id.split("-")[0];
+    const track = CURRICULUM[trackKey];
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === lesson.id);
+
+    document.getElementById("trackLabel").textContent = track.label;
+    document.getElementById("lessonTitle").textContent = lesson.title;
+    document.getElementById("theoryLessonTitle").textContent = lesson.title;
+    document.getElementById("theoryObjective").textContent = lesson.objective;
+    document.getElementById("theoryBody").innerHTML = lesson.theory;
+    document.getElementById("taskDesc").textContent = lesson.task;
+    document.getElementById("lessonXP").textContent = "+" + lesson.xp + " XP";
+    document.getElementById("modalSub").textContent = "You earned +" + lesson.xp + " XP";
+    document.getElementById("modalXP").textContent = "+" + lesson.xp + " XP";
+    document.title = lesson.title + " — ENOVA Dev";
+
+    document.getElementById("hintsSection").innerHTML = lesson.hints.map(h => '<div class="hint-item">💡 ' + h + '</div>').join("");
+
+    document.getElementById("prevBtn").disabled = idx === 0;
+    document.getElementById("nextBtn").textContent = idx === all.length - 1 ? "Finish 🎓" : "Next →";
+
+    // Completed state
+    if (completedLessons.includes(lesson.id)) {
+      document.getElementById("checkBtn").textContent = "✓ Completed";
+      document.getElementById("checkBtn").style.borderColor = "var(--green)";
+      document.getElementById("checkBtn").style.color = "var(--green)";
+    } else {
+      document.getElementById("checkBtn").textContent = "Check Solution";
+      document.getElementById("checkBtn").style.borderColor = "";
+      document.getElementById("checkBtn").style.color = "";
+    }
+
+    window.history.replaceState({}, "", "?id=" + lesson.id);
+    initEditor(lesson.starterCode);
+  }
+
+  // ── Editor ─────────────────────────────────────────────────────
+  function initEditor(code) {
+    if (editor) {
+      editor.setValue(code);
+      setTimeout(() => { editor.refresh(); runCode(); }, 100);
+      return;
+    }
+    editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
+      mode: "htmlmixed",
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseTags: true,
+      indentUnit: 2,
+      tabSize: 2,
+      lineWrapping: true,
+      readOnly: false,
+      extraKeys: { "Ctrl-Enter": runCode, "Cmd-Enter": runCode }
+    });
+    editor.setValue(code);
+    editor.on("change", () => {
+      clearTimeout(window._autoRun);
+      window._autoRun = setTimeout(() => {
+        runCode();
+        updateCheckBtn();
+      }, 800);
+    });
+    setTimeout(() => { editor.refresh(); runCode(); }, 200);
+  }
+
+  // ── Run code ───────────────────────────────────────────────────
+  function runCode() {
+    if (!editor) return;
+    try {
+      const frame = document.getElementById("previewFrame");
+      const d = frame.contentDocument || frame.contentWindow.document;
+      d.open(); d.write(editor.getValue()); d.close();
+    } catch(e) { console.warn(e); }
+    updateCheckBtn();
+  }
+
+  // ── Update check button color ──────────────────────────────────
+  function updateCheckBtn() {
+    if (!currentLesson || completedLessons.includes(currentLesson.id)) return;
+    const code = editor ? editor.getValue() : "";
+    const passes = !currentLesson.check || currentLesson.check(code);
+    const btn = document.getElementById("checkBtn");
+    if (passes) {
+      btn.textContent = "✓ Ready to Submit!";
+      btn.style.borderColor = "var(--cyan)";
+      btn.style.color = "var(--cyan)";
+    } else {
+      btn.textContent = "Check Solution";
+      btn.style.borderColor = "";
+      btn.style.color = "";
+    }
+  }
+
+  // ── Reset / Copy ───────────────────────────────────────────────
+  function resetCode() {
+    if (!currentLesson) return;
+    if (confirm("Reset to starter code?")) { editor.setValue(currentLesson.starterCode); runCode(); }
+  }
+
+  function copyCode() {
+    navigator.clipboard.writeText(editor.getValue()).then(() => toast("Code copied!", "success"));
+  }
+
+  // ── Check solution ─────────────────────────────────────────────
+  async function checkSolution() {
+    if (!currentLesson || !currentUser) return;
+    const code = editor.getValue();
+
+    if (currentLesson.check && !currentLesson.check(code)) {
+      toast("Not quite! Check the hints or ask the AI tutor.", "error");
+      // Auto-trigger AI to explain what's wrong
+      aiHistory.push({ role:"user", content:"My code just failed the check. Task: " + currentLesson.task + "\n\nMy code:\n```html\n" + code + "\n```\n\nPlease explain specifically what is missing or wrong, and guide me step by step to fix it." });
+      await callAI(true);
+      return;
+    }
+
+    try {
+      const ref = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      const done = data.completedLessons || [];
+      if (!done.includes(currentLesson.id)) {
+        const newDone = [...done, currentLesson.id];
+        const newXP = (data.xp || 0) + currentLesson.xp;
+        await setDoc(ref, {
+          completedLessons: newDone,
+          xp: newXP,
+          level: Math.floor(newXP / 500) + 1,
+          lastActiveDate: serverTimestamp()
+        }, { merge: true });
+        completedLessons = newDone;
+      }
+    } catch(e) { console.warn("Firestore save failed:", e); }
+
+    document.getElementById("successModal").style.display = "flex";
+    document.getElementById("checkBtn").textContent = "✓ Completed";
+    document.getElementById("checkBtn").style.borderColor = "var(--green)";
+    document.getElementById("checkBtn").style.color = "var(--green)";
+    toast("+" + currentLesson.xp + " XP earned! 🎉", "success");
+    addMsg("🎉 **Lesson Complete!** You earned **+" + currentLesson.xp + " XP**!\n\nYou just mastered: " + currentLesson.objective + "\n\nClick **Next →** when you're ready!", "bot");
+  }
+
+  // ── Navigation ─────────────────────────────────────────────────
+  function goPrev() {
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === currentLesson.id);
+    if (idx > 0) loadLesson(all[idx - 1]);
+  }
+
+  function goNext() {
+    document.getElementById("successModal").style.display = "none";
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === currentLesson.id);
+    if (idx < all.length - 1) loadLesson(all[idx + 1]);
+    else window.location.href = "certificate.html";
+  }
+
+  // ── AI Chat ────────────────────────────────────────────────────
+  function addMsg(text, role) {
+    const container = document.getElementById("aiMessages");
+    const wrap = document.createElement("div");
+    wrap.className = "ai-msg ai-msg-" + (role === "bot" ? "bot" : "user");
+    const fmt = text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\n/g, "<br/>");
+    if (role === "bot") {
+      wrap.innerHTML = '<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble">' + fmt + '</div>';
+    } else {
+      wrap.innerHTML = '<div class="ai-msg-bubble ai-msg-user-bubble">' + fmt + '</div>';
+    }
+    container.appendChild(wrap);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function showTyping() {
+    const container = document.getElementById("aiMessages");
+    const el = document.createElement("div");
+    el.id = "aiTyping";
+    el.className = "ai-msg ai-msg-bot";
+    el.innerHTML = '<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function callAI(autoCheck) {
+    if (aiSending) return;
+    aiSending = true;
+    document.getElementById("aiSendBtn").disabled = true;
+    showTyping();
+
+    const code = editor ? editor.getValue() : "";
+    const systemPrompt = "You are ENOVA Dev AI, a coding tutor for beginners learning HTML, CSS and JavaScript.\n\nCurrent lesson: \"" + (currentLesson ? currentLesson.title : "") + "\"\nObjective: " + (currentLesson ? currentLesson.objective : "") + "\nTask: " + (currentLesson ? currentLesson.task : "") + "\n\nStudent's current code:\n```html\n" + code + "\n```\n\nRULES:\n1. Always analyze the code and explain what's wrong or missing clearly.\n2. If the student needs help, provide a corrected code snippet in ONE code block:\n```html\n<code here>\n```\nThe app will automatically inject this into the editor.\n3. Keep responses under 200 words.\n4. Be encouraging. If code looks correct tell them to click Check Solution.\n5. If no code change needed, just explain in plain text.";
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemPrompt, messages: aiHistory })
+      });
+      const data = await res.json();
+      document.getElementById("aiTyping")?.remove();
+
+      const reply = data.reply || data.error || "Something went wrong.";
+      aiHistory.push({ role:"assistant", content: reply });
+
+      // Extract code block and inject into editor
+      const codeMatch = reply.match(/```(?:html|css|js|javascript)?\n([\s\S]*?)```/);
+      if (codeMatch && editor) {
+        editor.setValue(codeMatch[1].trim());
+        setTimeout(runCode, 200);
+        toast("AI wrote code to editor ✨", "info");
+      }
+
+      // Display message, replace code block with notice
+      const display = codeMatch
+        ? reply.replace(/```(?:html|css|js|javascript)?\n[\s\S]*?```/g, "✏️ <em>Code written to editor ↑</em>")
+        : reply;
+      addMsg(display, "bot");
+
+    } catch(e) {
+      document.getElementById("aiTyping")?.remove();
+      addMsg("Connection error: " + e.message, "bot");
+    }
+
+    aiSending = false;
+    document.getElementById("aiSendBtn").disabled = false;
+  }
+
+  async function sendAI() {
+    const input = document.getElementById("aiInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = "";
+
+    if (msg.toLowerCase() === "/hint") {
+      addMsg("/hint", "user");
+      const h = currentLesson.hints[Math.floor(Math.random() * currentLesson.hints.length)];
+      addMsg("Here's a hint 💡\n\n**" + h + "**", "bot");
+      return;
+    }
+
+    addMsg(msg, "user");
+    aiHistory.push({ role:"user", content: msg });
+    await callAI(false);
+  }
+
+  function clearChat() {
+    document.getElementById("aiMessages").innerHTML = "";
+    aiHistory = [];
+    addMsg("Chat cleared! Ask me anything about this lesson 👋", "bot");
+  }
+</script>
+</body>
+</html>
