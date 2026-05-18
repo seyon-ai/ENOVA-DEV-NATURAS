@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <style>
+    body { background:var(--bg); }
+    .admin-layout { display:grid; grid-template-columns:240px 1fr; min-height:100vh; }
+    /* Sidebar */
+    .admin-sidebar { background:var(--bg-2); border-right:1px solid var(--border); padding:28px 16px; display:flex; flex-direction:column; gap:4px; }
+    .admin-logo { font-family:var(--font-display); font-size:18px; font-weight:800; margin-bottom:32px; padding:0 8px; }
+    .admin-logo span { color:var(--cyan); }
+    .admin-logo small { display:block; font-size:10px; color:var(--text-3); font-family:var(--font-mono); letter-spacing:1px; margin-top:2px; }
+    .admin-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius-sm); color:var(--text-2); font-family:var(--font-display); font-size:13px; font-weight:500; cursor:pointer; transition:var(--transition); border:none; background:none; width:100%; text-align:left; }
+    .admin-nav-item:hover { background:var(--surface); color:var(--text); }
+    .admin-nav-item.active { background:var(--cyan-dim); color:var(--cyan); border:1px solid rgba(0,212,255,0.15); }
+    .admin-badge { margin-left:auto; padding:2px 8px; border-radius:999px; font-size:11px; font-family:var(--font-mono); font-weight:700; }
+    .badge-pending { background:var(--gold-dim); color:var(--gold); }
+    .badge-count { background:var(--surface-2); color:var(--text-3); }
+    /* Main */
+    .admin-main { padding:40px 48px; display:flex; flex-direction:column; gap:28px; overflow-y:auto; }
+    .admin-header { display:flex; align-items:center; justify-content:space-between; }
+    .admin-title { font-family:var(--font-display); font-size:28px; font-weight:800; letter-spacing:-0.5px; }
+    .admin-subtitle { font-size:13px; color:var(--text-3); font-family:var(--font-mono); margin-top:4px; }
+    /* Stats row */
+    .admin-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .admin-stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px 24px; }
+    .admin-stat-num { font-family:var(--font-display); font-size:32px; font-weight:800; letter-spacing:-1px; }
+    .admin-stat-label { font-size:12px; color:var(--text-3); font-family:var(--font-mono); margin-top:4px; }
+    /* Filter tabs */
+    .filter-tabs { display:flex; gap:8px; }
+    .filter-tab { padding:8px 16px; border-radius:var(--radius-sm); font-family:var(--font-mono); font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text-2); transition:var(--transition); }
+    .filter-tab.active { border-color:var(--cyan); color:var(--cyan); background:var(--cyan-dim); }
+    /* Applications table */
+    .apps-table { display:flex; flex-direction:column; gap:12px; }
+    .app-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; transition:var(--transition); }
+    .app-card:hover { border-color:var(--border-hover); }
+    .app-card-header { display:flex; align-items:center; gap:16px; padding:20px 24px; cursor:pointer; }
+    .app-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--cyan),var(--violet)); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--bg); flex-shrink:0; }
+    .app-info { flex:1; }
+    .app-name { font-family:var(--font-display); font-size:15px; font-weight:700; }
+    .app-email { font-size:12px; color:var(--text-3); font-family:var(--font-mono); margin-top:2px; }
+    .app-meta { display:flex; align-items:center; gap:12px; margin-top:6px; }
+    .app-score-badge { padding:3px 10px; border-radius:999px; font-family:var(--font-mono); font-size:11px; font-weight:700; }
+    .score-high { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+    .score-mid { background:var(--cyan-dim); color:var(--cyan); border:1px solid rgba(0,212,255,0.2); }
+    .score-low { background:var(--gold-dim); color:var(--gold); border:1px solid rgba(245,158,11,0.2); }
+    .app-status { padding:3px 10px; border-radius:999px; font-family:var(--font-mono); font-size:11px; }
+    .status-pending { background:var(--gold-dim); color:var(--gold); border:1px solid rgba(245,158,11,0.2); }
+    .status-approved_free { background:rgba(16,185,129,0.12); color:#10b981; border:1px solid rgba(16,185,129,0.2); }
+    .status-approved_paid { background:var(--cyan-dim); color:var(--cyan); border:1px solid rgba(0,212,255,0.2); }
+    .status-rejected { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); }
+    .app-time { font-size:11px; color:var(--text-3); font-family:var(--font-mono); margin-left:auto; }
+    /* Expanded details */
+    .app-details { border-top:1px solid var(--border); padding:24px; display:none; flex-direction:column; gap:20px; }
+    .app-details.open { display:flex; }
+    .app-section-title { font-family:var(--font-mono); font-size:11px; color:var(--text-3); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
+    .qa-item { display:flex; flex-direction:column; gap:6px; padding:14px; background:var(--bg-2); border-radius:var(--radius-sm); border-left:3px solid var(--border); }
+    .qa-q { font-size:13px; font-weight:600; color:var(--text-2); }
+    .qa-a { font-size:14px; color:var(--text); line-height:1.6; }
+    .ai-eval-box { background:var(--bg-2); border-radius:var(--radius-sm); padding:16px; display:flex; flex-direction:column; gap:10px; border:1px solid var(--border); }
+    .ai-eval-row { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; }
+    .ai-eval-label { color:var(--text-3); font-family:var(--font-mono); font-size:11px; }
+    .ai-eval-val { color:var(--text); }
+    .admin-actions { display:flex; gap:8px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--border); }
+    .btn-approve-free { background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius-sm); font-family:var(--font-display); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition); }
+    .btn-approve-free:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,0.4); }
+    .btn-approve-paid { background:linear-gradient(135deg,var(--cyan),#0099bb); color:var(--bg); border:none; padding:10px 20px; border-radius:var(--radius-sm); font-family:var(--font-display); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition); }
+    .btn-approve-paid:hover { transform:translateY(-1px); box-shadow:0 4px 12px var(--cyan-glow); }
+    .btn-reject { background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:10px 20px; border-radius:var(--radius-sm); font-family:var(--font-display); font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition); }
+    .btn-reject:hover { background:rgba(239,68,68,0.2); }
+    .btn-note { background:var(--surface-2); color:var(--text-2); border:1px solid var(--border); padding:10px 16px; border-radius:var(--radius-sm); font-family:var(--font-mono); font-size:12px; cursor:pointer; }
+    /* Admin note */
+    .admin-note-area { width:100%; padding:10px 14px; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:13px; font-family:var(--font-body); resize:none; min-height:60px; }
+    /* Login gate */
+    .admin-login { max-width:400px; margin:0 auto; padding:80px 20px; display:flex; flex-direction:column; gap:20px; }
+    .empty-state { text-align:center; padding:60px 20px; color:var(--text-3); }
+    .empty-icon { font-size:48px; margin-bottom:16px; }
+    /* Loading */
+    .table-loading { display:flex; align-items:center; justify-content:center; gap:12px; padding:40px; color:var(--text-2); }
+    @media(max-width:900px){ .admin-layout{grid-template-columns:1fr} .admin-sidebar{display:none} .admin-main{padding:24px 16px} .admin-stats{grid-template-columns:repeat(2,1fr)} }
+  </style>
+</head>
+<body>
+
+<!-- Admin login gate -->
+<div id="loginGate" style="display:none;min-height:100vh;display:flex;align-items:center;justify-content:center">
+  <div class="admin-login">
+    <div style="text-align:center">
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:8px">ENOVA<span style="color:var(--cyan)">.</span>dev</div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--cyan);letter-spacing:2px">ADMIN PANEL</div>
+    </div>
+    <div class="card" style="padding:28px;display:flex;flex-direction:column;gap:16px">
+      <div class="input-group">
+        <label class="input-label">Admin Email</label>
+        <input class="input-field" id="adminEmail" type="email" placeholder="admin@enovadev.com"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <input class="input-field" id="adminPass" type="password" placeholder="••••••••"/>
+      </div>
+      <button class="btn-primary" id="adminLoginBtn" style="padding:13px">Sign In to Admin</button>
+      <p style="font-size:12px;color:var(--text-3);text-align:center">Only authorized admins can access this panel.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Main admin panel -->
+<div id="adminPanel" style="display:none">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-logo">ENOVA<span>.</span>dev <small>ADMIN PANEL</small></div>
+      <button class="admin-nav-item active" onclick="setTab('applications')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Applications
+        <span class="admin-badge badge-pending" id="pendingBadge">0</span>
+      </button>
+      <button class="admin-nav-item" onclick="setTab('approved')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+        Approved
+        <span class="admin-badge badge-count" id="approvedBadge">0</span>
+      </button>
+      <button class="admin-nav-item" onclick="setTab('rejected')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Rejected
+        <span class="admin-badge badge-count" id="rejectedBadge">0</span>
+      </button>
+      <button class="admin-nav-item" onclick="setTab('stats')" style="margin-top:auto">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Stats
+      </button>
+      <button class="admin-nav-item" id="logoutAdminBtn" style="color:var(--red);border-color:transparent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-header">
+        <div>
+          <div class="admin-title" id="tabTitle">Applications</div>
+          <div class="admin-subtitle" id="tabSubtitle">Pending review</div>
+        </div>
+        <button class="btn-ghost" id="refreshBtn" style="font-size:13px">↺ Refresh</button>
+      </div>
+
+      <div class="admin-stats">
+        <div class="admin-stat"><div class="admin-stat-num" id="statTotal" style="color:var(--cyan)">0</div><div class="admin-stat-label">Total Applications</div></div>
+        <div class="admin-stat"><div class="admin-stat-num" id="statPending" style="color:var(--gold)">0</div><div class="admin-stat-label">Pending Review</div></div>
+        <div class="admin-stat"><div class="admin-stat-num" id="statApproved" style="color:#10b981">0</div><div class="admin-stat-label">Approved</div></div>
+        <div class="admin-stat"><div class="admin-stat-num" id="statRejected" style="color:#ef4444">0</div><div class="admin-stat-label">Rejected</div></div>
+      </div>
+
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" onclick="setFilter('all')">All</button>
+        <button class="filter-tab" onclick="setFilter('pending')">Pending</button>
+        <button class="filter-tab" onclick="setFilter('approved_free')">Free</button>
+        <button class="filter-tab" onclick="setFilter('approved_paid')">Paid</button>
+        <button class="filter-tab" onclick="setFilter('rejected')">Rejected</button>
+      </div>
+
+      <div class="apps-table" id="appsTable">
+        <div class="table-loading"><div class="spinner"></div><span>Loading applications...</span></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { collection, getDocs, doc, updateDoc, orderBy, query, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── ADMIN EMAIL — change this to your admin email ──────────────
+  const ADMIN_EMAIL = "admin@enovadev.com"; // ← CHANGE THIS
+
+  function toast(msg, type) {
+    const el = document.createElement("div");
+    el.className = "toast toast-"+(type||"info");
+    el.innerHTML = "<span>"+msg+"</span>";
+    document.getElementById("toastContainer").appendChild(el);
+    setTimeout(()=>el.remove(), 4000);
+  }
+
+  let allApps = [], currentFilter = "all", currentTab = "applications";
+  let currentAdmin = null;
+
+  // ── Auth guard ─────────────────────────────────────────────────
+  onAuthStateChanged(auth, async user => {
+    if (!user || user.email !== ADMIN_EMAIL) {
+      document.getElementById("loginGate").style.display = "flex";
+      document.getElementById("adminPanel").style.display = "none";
+    } else {
+      currentAdmin = user;
+      document.getElementById("loginGate").style.display = "none";
+      document.getElementById("adminPanel").style.display = "block";
+      await loadApplications();
+    }
+  });
+
+  document.getElementById("adminLoginBtn").onclick = async () => {
+    const email = document.getElementById("adminEmail").value.trim();
+    const pass = document.getElementById("adminPass").value;
+    if (!email||!pass) return toast("Fill in both fields","error");
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      toast(e.code==="auth/wrong-password"?"Wrong password":e.code==="auth/user-not-found"?"No account found":"Login failed: "+e.message,"error");
+    }
+  };
+
+  document.getElementById("logoutAdminBtn").onclick = () => signOut(auth);
+  document.getElementById("refreshBtn").onclick = loadApplications;
+
+  // ── Load all applications ──────────────────────────────────────
+  async function loadApplications() {
+    document.getElementById("appsTable").innerHTML = '<div class="table-loading"><div class="spinner"></div><span>Loading...</span></div>';
+    try {
+      const q = query(collection(db, "applications"), orderBy("submittedAt","desc"));
+      const snap = await getDocs(q);
+      allApps = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      updateStats();
+      renderTable();
+    } catch(e) {
+      document.getElementById("appsTable").innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to load: '+e.message+'</p></div>';
+    }
+  }
+
+  function updateStats() {
+    const total = allApps.length;
+    const pending = allApps.filter(a=>a.status==="pending").length;
+    const approved = allApps.filter(a=>a.status==="approved_free"||a.status==="approved_paid").length;
+    const rejected = allApps.filter(a=>a.status==="rejected").length;
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statPending").textContent = pending;
+    document.getElementById("statApproved").textContent = approved;
+    document.getElementById("statRejected").textContent = rejected;
+    document.getElementById("pendingBadge").textContent = pending;
+    document.getElementById("approvedBadge").textContent = approved;
+    document.getElementById("rejectedBadge").textContent = rejected;
+  }
+
+  window.setFilter = function(f) {
+    currentFilter = f;
+    document.querySelectorAll(".filter-tab").forEach(t=>{
+      t.classList.toggle("active", t.onclick.toString().includes("'"+f+"'"));
+    });
+    renderTable();
+  };
+
+  window.setTab = function(tab) {
+    currentTab = tab;
+    document.querySelectorAll(".admin-nav-item").forEach(i=>i.classList.remove("active"));
+    event.currentTarget.classList.add("active");
+    const titles = {applications:"Applications",approved:"Approved Users",rejected:"Rejected",stats:"Statistics"};
+    const subs = {applications:"Pending review",approved:"Approved for access",rejected:"Not approved",stats:"Platform overview"};
+    document.getElementById("tabTitle").textContent = titles[tab]||tab;
+    document.getElementById("tabSubtitle").textContent = subs[tab]||"";
+    if(tab==="applications") setFilter("pending");
+    else if(tab==="approved") setFilter("approved_free");
+    else if(tab==="rejected") setFilter("rejected");
+    else if(tab==="stats") setFilter("all");
+  };
+
+  function renderTable() {
+    const filtered = currentFilter==="all" ? allApps : allApps.filter(a=>a.status===currentFilter);
+    const table = document.getElementById("appsTable");
+    if (filtered.length===0) {
+      table.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No applications in this category.</p></div>';
+      return;
+    }
+    table.innerHTML = filtered.map(app => buildAppCard(app)).join("");
+    // Bind expand toggles
+    filtered.forEach(app => {
+      const hdr = document.getElementById("hdr-"+app.id);
+      const det = document.getElementById("det-"+app.id);
+      if(hdr) hdr.onclick = () => det.classList.toggle("open");
+    });
+    // Bind action buttons
+    filtered.forEach(app => {
+      ["approveFree","approvePaid","reject"].forEach(action => {
+        const btn = document.getElementById(action+"-"+app.id);
+        if(btn) btn.onclick = (e) => { e.stopPropagation(); updateStatus(app.id, action); };
+      });
+    });
+  }
+
+  function buildAppCard(app) {
+    const score = app.aiScore||0;
+    const scoreClass = score>=80?"score-high":score>=60?"score-mid":"score-low";
+    const statusClass = "status-"+(app.status||"pending");
+    const statusLabel = {pending:"Pending",approved_free:"Free Access",approved_paid:"Paid Access",rejected:"Rejected"}[app.status]||app.status;
+    const time = app.submittedAt?.seconds ? new Date(app.submittedAt.seconds*1000).toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+    const initial = (app.name||"?").charAt(0).toUpperCase();
+
+    const qa = (app.questions||[]).map((q,i)=>`
+      <div class="qa-item" style="border-left-color:var(--cyan)">
+        <div class="qa-q">Q${i+1}: ${q}</div>
+        <div class="qa-a">${app.answers?.[i]||"<em style='color:var(--text-3)'>No answer</em>"}</div>
+      </div>`).join("");
+
+    const isDone = app.status!=="pending";
+
+    return `<div class="app-card">
+      <div class="app-card-header" id="hdr-${app.id}">
+        <div class="app-avatar">${initial}</div>
+        <div class="app-info">
+          <div class="app-name">${app.name||"Unknown"}</div>
+          <div class="app-email">${app.email||""}</div>
+          <div class="app-meta">
+            <span class="app-score-badge ${scoreClass}">AI Score: ${score}/100</span>
+            <span class="app-status ${statusClass}">${statusLabel}</span>
+            <span style="font-size:11px;color:var(--text-3);font-family:var(--font-mono)">${app.aiRecommendation||""}</span>
+          </div>
+        </div>
+        <div class="app-time">${time}<br/><span style="color:var(--text-3)">▼ expand</span></div>
+      </div>
+      <div class="app-details" id="det-${app.id}">
+        <div>
+          <div class="app-section-title">Why they want to join</div>
+          <div style="font-size:14px;color:var(--text-2);line-height:1.7;background:var(--bg-2);padding:14px;border-radius:var(--radius-sm)">${app.why||"—"}</div>
+        </div>
+        <div>
+          <div class="app-section-title">AI Evaluation</div>
+          <div class="ai-eval-box">
+            <div class="ai-eval-row"><span class="ai-eval-label">SUMMARY</span><span class="ai-eval-val" style="font-size:13px;max-width:70%;text-align:right">${app.aiSummary||"—"}</span></div>
+            <div style="height:1px;background:var(--border)"></div>
+            <div class="ai-eval-row"><span class="ai-eval-label">STRENGTHS</span><span class="ai-eval-val" style="font-size:13px;max-width:70%;text-align:right;color:#10b981">${app.aiStrengths||"—"}</span></div>
+            <div class="ai-eval-row"><span class="ai-eval-label">CONCERNS</span><span class="ai-eval-val" style="font-size:13px;max-width:70%;text-align:right;color:var(--gold)">${app.aiConcerns||"—"}</span></div>
+            <div class="ai-eval-row"><span class="ai-eval-label">RECOMMENDATION</span><span class="ai-eval-val" style="font-size:12px;font-family:var(--font-mono)">${app.aiDecision||"—"}</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="app-section-title">Assessment Answers</div>
+          <div style="display:flex;flex-direction:column;gap:10px">${qa}</div>
+        </div>
+        <div>
+          <div class="app-section-title">Admin Note</div>
+          <textarea class="admin-note-area" id="note-${app.id}" placeholder="Add a note about this applicant...">${app.adminNote||""}</textarea>
+        </div>
+        <div class="admin-actions">
+          ${!isDone?`
+            <button class="btn-approve-free" id="approveFree-${app.id}">✓ Approve Free</button>
+            <button class="btn-approve-paid" id="approvePaid-${app.id}">💳 Approve Paid</button>
+            <button class="btn-reject" id="reject-${app.id}">✕ Reject</button>
+          `:`<span style="font-size:13px;color:var(--text-3);font-family:var(--font-mono)">Decision already made: ${statusLabel}</span>`}
+          <button class="btn-note" onclick="saveNote('${app.id}')">💾 Save Note</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function updateStatus(appId, action) {
+    const statusMap = { approveFree:"approved_free", approvePaid:"approved_paid", reject:"rejected" };
+    const status = statusMap[action];
+    const labels = { approveFree:"Approved for free!", approvePaid:"Approved for paid!", reject:"Application rejected" };
+    try {
+      await updateDoc(doc(db,"applications",appId),{
+        status, reviewedAt:serverTimestamp(), reviewedBy: currentAdmin?.email||"admin"
+      });
+      const app = allApps.find(a=>a.id===appId);
+      if(app) app.status = status;
+      updateStats(); renderTable();
+      toast(labels[action],"success");
+    } catch(e) { toast("Update failed: "+e.message,"error"); }
+  }
+
+  window.saveNote = async (appId) => {
+    const note = document.getElementById("note-"+appId)?.value||"";
+    try {
+      await updateDoc(doc(db,"applications",appId),{ adminNote:note });
+      const app = allApps.find(a=>a.id===appId);
+      if(app) app.adminNote = note;
+      toast("Note saved","success");
+    } catch(e) { toast("Save failed","error"); }
+  };
+</script>
+</body>
+</html>

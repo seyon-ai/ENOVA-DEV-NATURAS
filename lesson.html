@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lesson — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/lesson.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <style>
+    .score-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.3s ease}
+    .score-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;max-width:480px;width:90%;display:flex;flex-direction:column;gap:20px;animation:fadeUp 0.4s ease;box-shadow:0 40px 80px rgba(0,0,0,0.5)}
+    .score-header{display:flex;align-items:center;gap:16px}
+    .score-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;font-weight:800;flex-shrink:0;border:3px solid}
+    .score-circle.excellent{border-color:#10b981;background:rgba(16,185,129,0.1);color:#10b981}
+    .score-circle.good{border-color:var(--cyan);background:var(--cyan-dim);color:var(--cyan)}
+    .score-circle.fair{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
+    .score-circle.poor{border-color:#ef4444;background:rgba(239,68,68,0.1);color:#ef4444}
+    .score-breakdown{display:flex;flex-direction:column;gap:10px}
+    .score-item{display:flex;flex-direction:column;gap:4px}
+    .score-item-header{display:flex;justify-content:space-between;font-size:12px}
+    .score-item-label{color:var(--text-2);font-family:var(--font-mono)}
+    .score-bar{height:4px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+    .score-bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease}
+    .score-feedback{font-size:13px;color:var(--text-2);line-height:1.7;background:var(--bg-2);border-radius:var(--radius-sm);padding:14px;border-left:3px solid var(--cyan)}
+    .score-actions{display:flex;gap:10px}
+    .score-loading{display:flex;align-items:center;gap:12px;color:var(--text-2);font-size:14px;padding:20px 0}
+    /* Locked overlay */
+    .locked-overlay{position:absolute;inset:0;background:rgba(5,5,8,0.85);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:10;border-radius:inherit}
+    .locked-msg{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-2);text-align:center;padding:0 20px}
+    .locked-icon{font-size:40px}
+  </style>
+</head>
+<body>
+
+<header class="lesson-topbar">
+  <div class="lesson-topbar-left">
+    <a href="dashboard.html" class="back-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+    <a href="index.html" class="nav-logo" style="font-size:16px">ENOVA<span>.</span>dev</a>
+    <div class="lesson-breadcrumb"><span id="trackLabel">HTML</span><span style="color:var(--text-3)">›</span><span id="lessonTitle">Loading...</span></div>
+  </div>
+  <div class="lesson-topbar-right">
+    <div class="lesson-xp-badge" id="lessonXP">+100 XP</div>
+    <button class="btn-primary run-btn" id="runBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Run</button>
+    <button class="btn-ghost check-btn" id="checkBtn">⚡ Submit for AI Review</button>
+    <a href="dashboard.html" class="btn-ghost" style="font-size:13px;padding:8px 16px;">Dashboard</a>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="theory-panel">
+    <div class="theory-inner">
+      <div class="theory-badge" id="theoryObjective"></div>
+      <h2 class="theory-title" id="theoryTitle">Loading...</h2>
+      <div class="theory-body" id="theoryBody"></div>
+      <div class="task-box">
+        <div class="task-header"><span class="task-icon">🎯</span><span>Your Task</span></div>
+        <p class="task-desc" id="taskDesc">Loading...</p>
+        <div class="hints-section" id="hintsSection"></div>
+      </div>
+      <div class="lesson-nav">
+        <button class="btn-ghost lesson-nav-btn" id="prevBtn">← Previous</button>
+        <button class="btn-primary lesson-nav-btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="editor-panel" style="position:relative">
+    <div class="editor-topbar">
+      <div class="editor-tabs"><div class="editor-tab active">index.html</div></div>
+      <div class="editor-actions">
+        <button class="editor-action-btn" id="resetBtn">↺ Reset</button>
+        <button class="editor-action-btn" id="copyBtn">⎘ Copy</button>
+      </div>
+    </div>
+    <textarea id="codeEditor"></textarea>
+    <!-- Locked overlay shown for locked lessons -->
+    <div class="locked-overlay" id="lockedOverlay" style="display:none">
+      <div class="locked-icon">🔒</div>
+      <div class="locked-msg">Complete the previous lesson first<br/><span style="font-size:12px;color:var(--text-3);font-family:var(--font-mono)">Score 70+ to unlock this lesson</span></div>
+      <a href="dashboard.html" class="btn-ghost" style="margin-top:8px">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="preview-panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="panel-dot" style="background:var(--green)"></span>Live Preview</span>
+        <button class="editor-action-btn" id="refreshBtn">↺</button>
+      </div>
+      <div class="preview-frame-wrap"><iframe id="previewFrame" sandbox="allow-scripts allow-same-origin" title="Preview"></iframe></div>
+    </div>
+    <div class="ai-panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="panel-dot ai-dot"></span>ENOVA AI Tutor</span>
+        <button class="editor-action-btn" id="clearChatBtn">✕ Clear</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg ai-msg-bot">
+          <div class="ai-msg-avatar">AI</div>
+          <div class="ai-msg-bubble">Hey! I'm your ENOVA AI tutor 👋<br/>I'll guide you with explanations and hints — but <strong>you write the code</strong>! Type <strong>/hint</strong> for a clue, or hit <strong>Submit for AI Review</strong> when ready.</div>
+        </div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInput" placeholder="Ask anything or type /hint..." type="text"/>
+        <button class="ai-send-btn" id="aiSendBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="successModal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-icon">🎉</div>
+    <h2 class="modal-title">Lesson Complete!</h2>
+    <p class="modal-sub" id="modalSub">You earned XP!</p>
+    <div class="modal-xp" id="modalXP">+100 XP</div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="modalNextBtn">Next Lesson →</button>
+      <a href="dashboard.html" class="btn-ghost">Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { CURRICULUM, TRACKS, getAllLessons, getLessonById } from "./js/app.js";
+
+  let editor=null, lesson=null, currentUser=null;
+  let completedLessons=[], aiHistory=[], aiSending=false;
+  let isLocked=false;
+  const PASS_SCORE=70;
+
+  function toast(msg,type){
+    const el=document.createElement("div");
+    el.className="toast toast-"+(type||"info");
+    el.innerHTML="<span>"+msg+"</span>";
+    document.getElementById("toastContainer").appendChild(el);
+    setTimeout(()=>el.remove(),4000);
+  }
+
+  // ── Check if lesson is locked ──────────────────────────────────
+  function isLessonLocked(lessonId, completed) {
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === lessonId);
+    if (idx === 0) return false; // first lesson always unlocked
+    const prev = all[idx - 1];
+    return !completed.includes(prev.id);
+  }
+
+  // ── Auth ──────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "login.html"; return; }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db,"users",user.uid));
+      if (snap.exists()) completedLessons = snap.data().completedLessons || [];
+    } catch(e) { console.error(e); }
+    const id = new URLSearchParams(window.location.search).get("id") || "html-1";
+    loadLesson(getLessonById(id) || getLessonById("html-1"));
+    bindButtons();
+  });
+
+  function bindButtons() {
+    document.getElementById("runBtn").onclick = runCode;
+    document.getElementById("checkBtn").onclick = submitForReview;
+    document.getElementById("resetBtn").onclick = resetCode;
+    document.getElementById("copyBtn").onclick = copyCode;
+    document.getElementById("refreshBtn").onclick = runCode;
+    document.getElementById("prevBtn").onclick = goPrev;
+    document.getElementById("nextBtn").onclick = goNext;
+    document.getElementById("modalNextBtn").onclick = goNext;
+    document.getElementById("aiSendBtn").onclick = sendAI;
+    document.getElementById("clearChatBtn").onclick = clearChat;
+    document.getElementById("aiInput").onkeydown = e => { if(e.key==="Enter") sendAI(); };
+  }
+
+  function loadLesson(lsn) {
+    lesson = lsn;
+    const tk = lsn.id.split("-")[0];
+    const track = CURRICULUM[tk];
+    const all = getAllLessons();
+    const idx = all.findIndex(l => l.id === lsn.id);
+
+    document.getElementById("trackLabel").textContent = track.label;
+    document.getElementById("lessonTitle").textContent = lsn.title;
+    document.getElementById("theoryTitle").textContent = lsn.title;
+    document.getElementById("theoryObjective").textContent = lsn.objective;
+    document.getElementById("theoryBody").innerHTML = lsn.theory;
+    document.getElementById("taskDesc").textContent = lsn.task;
+    document.getElementById("lessonXP").textContent = "+"+lsn.xp+" XP";
+    document.getElementById("modalSub").textContent = "You earned +"+lsn.xp+" XP";
+    document.getElementById("modalXP").textContent = "+"+lsn.xp+" XP";
+    document.title = lsn.title+" — ENOVA Dev";
+    document.getElementById("hintsSection").innerHTML = lsn.hints.map(h=>'<div class="hint-item">💡 '+h+'</div>').join("");
+    document.getElementById("prevBtn").disabled = idx===0;
+
+    // Check if lesson is locked
+    isLocked = isLessonLocked(lsn.id, completedLessons);
+    const isDone = completedLessons.includes(lsn.id);
+
+    // Lock/unlock UI
+    document.getElementById("lockedOverlay").style.display = isLocked ? "flex" : "none";
+    document.getElementById("checkBtn").disabled = isLocked;
+    document.getElementById("runBtn").disabled = isLocked;
+
+    // Next button — locked if current not done AND not first
+    const nextBtn = document.getElementById("nextBtn");
+    if (idx === all.length-1) {
+      nextBtn.textContent = "Finish 🎓";
+      nextBtn.disabled = !isDone;
+    } else {
+      nextBtn.textContent = "Next →";
+      nextBtn.disabled = !isDone; // can't go next until current is done
+    }
+    if (!isDone && !isLocked) {
+      nextBtn.title = "Complete this lesson first to advance";
+    }
+
+    const btn = document.getElementById("checkBtn");
+    if (isDone) {
+      btn.textContent = "✓ Completed";
+      btn.style.borderColor = "var(--green)";
+      btn.style.color = "var(--green)";
+    } else {
+      btn.textContent = "⚡ Submit for AI Review";
+      btn.style.borderColor = "";
+      btn.style.color = "";
+    }
+
+    window.history.replaceState({},""," ?id="+lsn.id);
+    initEditor(lsn.starter);
+    aiHistory = [];
+    document.getElementById("aiMessages").innerHTML = "";
+
+    if (isLocked) {
+      addMsg("🔒 This lesson is locked. Complete the previous lesson first by scoring **70 or higher**.", "bot");
+    } else {
+      addMsg("📘 **"+lsn.title+"**\n\n"+lsn.objective+"\n\nRemember: I'll guide you but **you write the code**. I won't write it directly — I'll show logic using `// pseudocode` comments. Type /hint for a clue!", "bot");
+    }
+  }
+
+  function initEditor(code) {
+    if (editor) { editor.setValue(code); setTimeout(()=>{editor.refresh();if(!isLocked)runCode();},100); return; }
+    editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"),{
+      mode:"htmlmixed", lineNumbers:true, matchBrackets:true, autoCloseTags:true,
+      indentUnit:2, tabSize:2, lineWrapping:true,
+      extraKeys:{"Ctrl-Enter":runCode,"Cmd-Enter":runCode}
+    });
+    editor.setValue(code);
+    editor.on("change",()=>{ clearTimeout(window._ar); window._ar=setTimeout(()=>{if(!isLocked)runCode();},800); });
+    setTimeout(()=>{ editor.refresh(); if(!isLocked)runCode(); },200);
+  }
+
+  function runCode() {
+    if (!editor||isLocked) return;
+    try {
+      const fr=document.getElementById("previewFrame");
+      const d=fr.contentDocument||fr.contentWindow.document;
+      d.open(); d.write(editor.getValue()); d.close();
+    } catch(e){console.warn(e);}
+  }
+
+  function resetCode() {
+    if (!lesson||isLocked||!confirm("Reset to starter code?")) return;
+    editor.setValue(lesson.starter); runCode();
+  }
+  function copyCode() {
+    navigator.clipboard.writeText(editor.getValue()).then(()=>toast("Copied!","success"));
+  }
+
+  // ── AI Scoring ────────────────────────────────────────────────
+  async function submitForReview() {
+    if (!lesson||!currentUser||aiSending||isLocked) return;
+    const code = editor.getValue().trim();
+    if (code.length<20) { toast("Write some code first!","error"); return; }
+
+    const overlay = document.createElement("div");
+    overlay.className = "score-modal-overlay";
+    overlay.id = "scoreOverlay";
+    overlay.innerHTML = '<div class="score-modal"><div class="score-loading"><div class="spinner"></div><span>AI is reviewing your code...</span></div></div>';
+    document.body.appendChild(overlay);
+    aiSending=true;
+    document.getElementById("checkBtn").disabled=true;
+
+    const sys = `You are ENOVA Dev AI, a strict but fair code reviewer for beginners.
+Lesson: "${lesson.title}"
+Task: ${lesson.task}
+Student code:
+\`\`\`html
+${code}
+\`\`\`
+Respond ONLY with valid JSON (no markdown):
+{"score":<0-100>,"correctness":<0-100>,"completeness":<0-100>,"quality":<0-100>,"passed":<true if score>=70>,"summary":"<2-3 sentences: what they did well and what's missing>","improvements":"<one specific actionable tip>"}
+Scoring: correctness=50%, completeness=30%, quality=20%`;
+
+    try {
+      const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemPrompt:sys,messages:[{role:"user",content:"Review my code."}],mode:"score"})});
+      const data = await res.json();
+      document.getElementById("scoreOverlay")?.remove();
+      let result;
+      try { result=JSON.parse(data.reply.replace(/```json|```/g,"").trim()); }
+      catch(e){ result={score:0,correctness:0,completeness:0,quality:0,passed:false,summary:"Could not parse response.",improvements:"Try again."}; }
+      showScoreModal(result,code);
+    } catch(e) {
+      document.getElementById("scoreOverlay")?.remove();
+      toast("Review failed: "+e.message,"error");
+    }
+    aiSending=false;
+    document.getElementById("checkBtn").disabled=false;
+  }
+
+  function showScoreModal(result, code) {
+    const score = Math.min(100,Math.max(0,result.score||0));
+    const grade = score>=90?"excellent":score>=70?"good":score>=50?"fair":"poor";
+    const gradeLabel = score>=90?"Excellent!":score>=70?"Passed!":score>=50?"Keep Going":"Needs Work";
+    const gradeColor = grade==="excellent"?"#10b981":grade==="good"?"var(--cyan)":grade==="fair"?"var(--gold)":"#ef4444";
+
+    const overlay = document.createElement("div");
+    overlay.className="score-modal-overlay";
+    overlay.id="scoreResult";
+    overlay.innerHTML=`<div class="score-modal">
+      <div class="score-header">
+        <div class="score-circle ${grade}" style="font-size:22px">${score}<span style="font-size:10px;color:${gradeColor};font-family:var(--font-mono)">/100</span></div>
+        <div>
+          <div class="score-title">${result.passed?"🎉 Lesson Passed!":"📝 Not Quite Yet"}</div>
+          <div style="font-size:13px;color:var(--text-2);margin-top:6px">${result.passed?"Score "+score+" — great work!":"Need 70+ to advance. You got "+score+"."}</div>
+        </div>
+      </div>
+      <div class="score-breakdown">
+        ${[{l:"Correctness",v:result.correctness||0,c:"#10b981"},{l:"Completeness",v:result.completeness||0,c:"var(--cyan)"},{l:"Code Quality",v:result.quality||0,c:"var(--violet)"}].map(i=>`
+          <div class="score-item">
+            <div class="score-item-header"><span class="score-item-label">${i.l}</span><span style="font-size:12px;font-weight:600">${i.v}/100</span></div>
+            <div class="score-bar"><div class="score-bar-fill" style="width:${i.v}%;background:${i.c}"></div></div>
+          </div>`).join("")}
+      </div>
+      <div class="score-feedback">${result.summary||"Keep practicing!"}</div>
+      ${result.improvements?`<div style="font-size:13px;color:var(--gold);background:var(--gold-dim);padding:12px;border-radius:8px;border-left:3px solid var(--gold)">💡 ${result.improvements}</div>`:""}
+      <div class="score-actions">
+        ${result.passed
+          ?`<button class="btn-primary" id="scoreNext" style="flex:1">Next Lesson →</button><button class="btn-ghost" id="scoreClose">Close</button>`
+          :`<button class="btn-primary" id="scoreHelp" style="flex:1">Ask AI for Help</button><button class="btn-ghost" id="scoreClose">Try Again</button>`}
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+
+    document.getElementById("scoreClose").onclick=()=>overlay.remove();
+    if (result.passed) {
+      saveProgress();
+      document.getElementById("scoreNext").onclick=()=>{ overlay.remove(); goNext(); };
+      addMsg("🎉 **Score: "+score+"/100 — Passed!**\n\n"+(result.summary||"")+"\n\nClick **Next →** when ready!", "bot");
+    } else {
+      document.getElementById("scoreHelp").onclick=()=>{
+        overlay.remove();
+        const m="My code scored "+score+"/100. "+(result.summary||"")+" Please guide me step by step without writing the actual code for me.";
+        aiHistory.push({role:"user",content:m+"\n\nMy code:\n```html\n"+code+"\n```"});
+        addMsg(m,"user"); callAI();
+      };
+      addMsg("📊 **Score: "+score+"/100**\n\n"+(result.summary||"")+"\n\n💡 "+(result.improvements||""),"bot");
+    }
+  }
+
+  async function saveProgress() {
+    if (!currentUser||!lesson) return;
+    try {
+      const ref=doc(db,"users",currentUser.uid);
+      const snap=await getDoc(ref);
+      const data=snap.exists()?snap.data():{};
+      const done=data.completedLessons||[];
+      if (!done.includes(lesson.id)) {
+        const newXP=(data.xp||0)+lesson.xp;
+        await setDoc(ref,{completedLessons:[...done,lesson.id],xp:newXP,level:Math.floor(newXP/500)+1,lastActiveDate:serverTimestamp()},{merge:true});
+        completedLessons=[...done,lesson.id];
+      }
+      const btn=document.getElementById("checkBtn");
+      btn.textContent="✓ Completed"; btn.style.borderColor="var(--green)"; btn.style.color="var(--green)";
+      // Unlock next button
+      document.getElementById("nextBtn").disabled=false;
+      toast("+"+lesson.xp+" XP earned! 🎉","success");
+    } catch(e){console.error(e);}
+  }
+
+  function goPrev() {
+    const all=getAllLessons(); const idx=all.findIndex(l=>l.id===lesson.id);
+    if(idx>0) loadLesson(all[idx-1]);
+  }
+  function goNext() {
+    document.getElementById("successModal").style.display="none";
+    document.getElementById("scoreResult")?.remove();
+    const all=getAllLessons(); const idx=all.findIndex(l=>l.id===lesson.id);
+    if (!completedLessons.includes(lesson.id)) { toast("Complete this lesson first!","error"); return; }
+    if(idx<all.length-1) loadLesson(all[idx+1]);
+    else window.location.href="certificate.html";
+  }
+
+  // ── AI (pseudocode only, no direct code) ─────────────────────
+  function addMsg(text,role) {
+    const c=document.getElementById("aiMessages");
+    const w=document.createElement("div");
+    w.className="ai-msg ai-msg-"+(role==="bot"?"bot":"user");
+    const fmt=text.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\n/g,"<br/>");
+    w.innerHTML=role==="bot"?'<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble">'+fmt+'</div>':'<div class="ai-msg-bubble ai-msg-user-bubble">'+fmt+'</div>';
+    c.appendChild(w); c.scrollTop=c.scrollHeight;
+  }
+
+  async function callAI() {
+    if(aiSending) return;
+    aiSending=true;
+    document.getElementById("aiSendBtn").disabled=true;
+    const c=document.getElementById("aiMessages");
+    const typing=document.createElement("div");
+    typing.id="aiTyping"; typing.className="ai-msg ai-msg-bot";
+    typing.innerHTML='<div class="ai-msg-avatar">AI</div><div class="ai-msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+    c.appendChild(typing); c.scrollTop=c.scrollHeight;
+
+    const code=editor?editor.getValue():"";
+    const sys=`You are ENOVA Dev AI — a Socratic coding tutor. You guide students to write code themselves.
+
+Lesson: "${lesson?lesson.title:""}"
+Task: ${lesson?lesson.task:""}
+Student code:
+\`\`\`html
+${code}
+\`\`\`
+
+STRICT RULES — NEVER BREAK THESE:
+1. NEVER write actual working code in your response
+2. You MAY show pseudocode/logic using // comments like:
+   // Step 1: create a heading element
+   // Step 2: set its text content
+   // Step 3: add it inside body
+3. Ask questions that lead the student to figure it out
+4. Explain concepts clearly using analogies
+5. Point out specific errors without fixing them
+6. Celebrate effort and small wins
+7. If they ask you to "write the code" or "do it for me" — kindly refuse and explain WHY they need to write it themselves
+8. Keep responses under 200 words`;
+
+    try {
+      const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemPrompt:sys,messages:aiHistory})});
+      const data=await res.json();
+      document.getElementById("aiTyping")?.remove();
+      const reply=data.reply||"Something went wrong.";
+      aiHistory.push({role:"assistant",content:reply});
+      addMsg(reply,"bot");
+    } catch(e) {
+      document.getElementById("aiTyping")?.remove();
+      addMsg("Error: "+e.message,"bot");
+    }
+    aiSending=false;
+    document.getElementById("aiSendBtn").disabled=false;
+  }
+
+  async function sendAI() {
+    const input=document.getElementById("aiInput");
+    const msg=input.value.trim(); if(!msg) return;
+    input.value="";
+    if(msg.toLowerCase()==="/hint"){
+      addMsg("/hint","user");
+      const h=lesson.hints[Math.floor(Math.random()*lesson.hints.length)];
+      addMsg("Here's a hint 💡\n\n**"+h+"**\n\nNow try applying it yourself!","bot"); return;
+    }
+    if(msg.toLowerCase()==="/score"){ addMsg("/score","user"); submitForReview(); return; }
+    addMsg(msg,"user");
+    aiHistory.push({role:"user",content:msg});
+    await callAI();
+  }
+
+  function clearChat() {
+    document.getElementById("aiMessages").innerHTML="";
+    aiHistory=[];
+    addMsg("Chat cleared! Ask me anything 👋","bot");
+  }
+</script>
+</body>
+</html>

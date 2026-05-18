@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Entry Test — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <style>
+    body { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; }
+    .test-wrap { max-width:720px; width:100%; display:flex; flex-direction:column; gap:32px; animation:fadeUp 0.6s ease; }
+    .test-header { text-align:center; }
+    .test-logo { font-family:var(--font-display); font-size:22px; font-weight:800; margin-bottom:24px; }
+    .test-logo span { color:var(--cyan); }
+    .test-title { font-family:var(--font-display); font-size:42px; font-weight:800; letter-spacing:-1.5px; line-height:1.1; margin-bottom:12px; }
+    .test-sub { font-size:16px; color:var(--text-2); line-height:1.7; }
+    .test-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px; display:flex; flex-direction:column; gap:20px; }
+    /* Info step */
+    .info-fields { display:flex; flex-direction:column; gap:16px; }
+    /* Quiz step */
+    .question-num { font-family:var(--font-mono); font-size:11px; color:var(--cyan); letter-spacing:1px; text-transform:uppercase; }
+    .question-text { font-family:var(--font-display); font-size:18px; font-weight:700; line-height:1.4; }
+    .question-sub { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .answer-area { width:100%; min-height:120px; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; color:var(--text); font-family:var(--font-body); font-size:14px; line-height:1.7; resize:vertical; transition:var(--transition); }
+    .answer-area:focus { border-color:var(--cyan); box-shadow:0 0 0 3px var(--cyan-dim); outline:none; }
+    .progress-bar-wrap { display:flex; flex-direction:column; gap:6px; }
+    .progress-label { display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--text-3); }
+    /* Result step */
+    .result-icon { font-size:60px; text-align:center; animation:float 3s ease-in-out infinite; }
+    .result-title { font-family:var(--font-display); font-size:28px; font-weight:800; letter-spacing:-0.5px; text-align:center; }
+    .result-msg { font-size:15px; color:var(--text-2); line-height:1.7; text-align:center; }
+    .result-actions { display:flex; flex-direction:column; gap:10px; }
+    /* Loading */
+    .loading-wrap { display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px; }
+    .loading-text { font-size:14px; color:var(--text-2); font-family:var(--font-mono); }
+    /* Steps indicator */
+    .steps-indicator { display:flex; align-items:center; justify-content:center; gap:8px; }
+    .step-dot { width:8px; height:8px; border-radius:50%; background:var(--surface-2); transition:var(--transition); }
+    .step-dot.active { background:var(--cyan); transform:scale(1.4); }
+    .step-dot.done { background:var(--green); }
+    /* Payment card */
+    .payment-card { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; display:flex; flex-direction:column; gap:12px; }
+    .payment-price { font-family:var(--font-display); font-size:36px; font-weight:800; color:var(--cyan); }
+    .payment-features { display:flex; flex-direction:column; gap:8px; }
+    .payment-feature { display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text-2); }
+    .payment-feature::before { content:"✓"; color:var(--green); font-weight:700; }
+  </style>
+</head>
+<body>
+
+<div class="test-wrap" id="testWrap">
+  <!-- Step 0: Welcome -->
+  <div id="stepWelcome">
+    <div class="test-header">
+      <div class="test-logo">ENOVA<span>.</span>dev</div>
+      <h1 class="test-title">Entry Assessment</h1>
+      <p class="test-sub">Before joining ENOVA Dev, we need to understand your background. Our AI will ask you 5 questions. Based on your answers, our team decides if you get <strong style="color:var(--cyan)">free access</strong> or need to pay.</p>
+    </div>
+    <div class="test-card">
+      <div class="info-fields">
+        <div class="input-group">
+          <label class="input-label">Full Name</label>
+          <input class="input-field" id="infoName" type="text" placeholder="Your full name"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Email Address</label>
+          <input class="input-field" id="infoEmail" type="email" placeholder="your@email.com"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Why do you want to learn web development?</label>
+          <textarea class="answer-area" id="infoWhy" placeholder="Tell us your story and goals..." style="min-height:90px"></textarea>
+        </div>
+      </div>
+      <button class="btn-primary" id="startTestBtn" style="width:100%;padding:14px">
+        Start Assessment →
+      </button>
+      <p style="font-size:12px;color:var(--text-3);text-align:center">Already have an account? <a href="login.html" style="color:var(--cyan)">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- Step 1: Loading questions -->
+  <div id="stepLoading" style="display:none">
+    <div class="test-card">
+      <div class="loading-wrap">
+        <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
+        <div class="loading-text" id="loadingText">Generating your personalized questions...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Questions -->
+  <div id="stepQuiz" style="display:none">
+    <div class="test-header" style="text-align:left;gap:8px;display:flex;flex-direction:column">
+      <div class="steps-indicator" id="stepsIndicator"></div>
+    </div>
+    <div class="test-card">
+      <div class="question-num" id="questionNum">Question 1 of 5</div>
+      <div class="question-text" id="questionText">Loading...</div>
+      <div class="question-sub" id="questionSub"></div>
+      <textarea class="answer-area" id="answerArea" placeholder="Type your answer here... Be as detailed as possible."></textarea>
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span id="progressLabel">Question 1/5</span><span id="progressPct">0%</span></div>
+        <div class="xp-bar-track"><div class="xp-bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <button class="btn-primary" id="nextQBtn" style="width:100%;padding:13px">Next Question →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Submitting -->
+  <div id="stepSubmitting" style="display:none">
+    <div class="test-card">
+      <div class="loading-wrap">
+        <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
+        <div class="loading-text">Submitting your assessment to our team...</div>
+        <div style="font-size:12px;color:var(--text-3)">You'll receive a decision at your email shortly.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Result -->
+  <div id="stepResult" style="display:none">
+    <div class="test-card" id="resultCard">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { auth, db } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // If already logged in, skip to dashboard
+  onAuthStateChanged(auth, user => { if (user) window.location.href = "dashboard.html"; });
+
+  function toast(msg, type) {
+    const el = document.createElement("div");
+    el.className = "toast toast-"+(type||"info");
+    el.innerHTML = "<span>"+msg+"</span>";
+    document.getElementById("toastContainer").appendChild(el);
+    setTimeout(()=>el.remove(), 4000);
+  }
+
+  function show(id) {
+    ["stepWelcome","stepLoading","stepQuiz","stepSubmitting","stepResult"].forEach(s=>{
+      document.getElementById(s).style.display = s===id?"block":"none";
+    });
+  }
+
+  let userInfo = {}, questions = [], answers = [], currentQ = 0;
+
+  // ── Step 0: Collect info, generate questions ──────────────────
+  document.getElementById("startTestBtn").onclick = async () => {
+    const name = document.getElementById("infoName").value.trim();
+    const email = document.getElementById("infoEmail").value.trim();
+    const why = document.getElementById("infoWhy").value.trim();
+    if (!name || !email || !why) { toast("Please fill in all fields","error"); return; }
+    if (!email.includes("@")) { toast("Enter a valid email","error"); return; }
+    userInfo = { name, email, why };
+    show("stepLoading");
+    await generateQuestions();
+  };
+
+  async function generateQuestions() {
+    const sys = `You are an expert technical interviewer for a web development learning platform called ENOVA Dev.
+
+Generate exactly 5 deep, thoughtful assessment questions for a new applicant.
+The questions should assess:
+1. Problem-solving mindset
+2. Current technical knowledge (HTML/CSS/JS if any)
+3. Learning motivation and dedication
+4. Understanding of web concepts
+5. Ability to think logically
+
+Applicant info:
+- Name: ${userInfo.name}
+- Why they want to learn: ${userInfo.why}
+
+Return ONLY a valid JSON array of 5 objects:
+[
+  {"question":"<question text>","subtitle":"<optional context or sub-question>","type":"<mindset|technical|motivation|concept|logic>"},
+  ...
+]
+Make questions progressively harder. Tailor them based on their motivation.`;
+
+    try {
+      const res = await fetch("/api/chat",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({systemPrompt:sys,messages:[{role:"user",content:"Generate questions for: "+userInfo.name}],mode:"score"})
+      });
+      const data = await res.json();
+      const clean = (data.reply||"[]").replace(/```json|```/g,"").trim();
+      questions = JSON.parse(clean);
+      if (!Array.isArray(questions)||questions.length<3) throw new Error("Bad response");
+    } catch(e) {
+      // Fallback questions if AI fails
+      questions = [
+        {question:"What is web development to you, and why do you want to learn it now?",subtitle:"Be specific about what excites you.",type:"motivation"},
+        {question:"If you had to explain what HTML does to a 10-year-old, how would you describe it?",subtitle:"",type:"concept"},
+        {question:"You're building a simple webpage and it doesn't look right on your phone. How would you approach debugging this?",subtitle:"Walk us through your thinking process.",type:"logic"},
+        {question:"What do you think is the hardest part of becoming a web developer, and how do you plan to overcome it?",subtitle:"",type:"mindset"},
+        {question:"Describe a time you learned something difficult. What was your process?",subtitle:"This could be anything — not just tech.",type:"mindset"}
+      ];
+    }
+
+    buildQuiz();
+    show("stepQuiz");
+  }
+
+  function buildQuiz() {
+    const indicator = document.getElementById("stepsIndicator");
+    indicator.innerHTML = questions.map((_,i)=>'<div class="step-dot" id="dot'+i+'"></div>').join("");
+    showQuestion(0);
+  }
+
+  function showQuestion(idx) {
+    currentQ = idx;
+    const q = questions[idx];
+    const pct = Math.round((idx/questions.length)*100);
+
+    document.getElementById("questionNum").textContent = "Question "+(idx+1)+" of "+questions.length;
+    document.getElementById("questionText").textContent = q.question;
+    document.getElementById("questionSub").textContent = q.subtitle||"";
+    document.getElementById("answerArea").value = answers[idx]||"";
+    document.getElementById("progressLabel").textContent = "Question "+(idx+1)+"/"+questions.length;
+    document.getElementById("progressPct").textContent = pct+"%";
+    document.getElementById("progressFill").style.width = pct+"%";
+    document.getElementById("nextQBtn").textContent = idx===questions.length-1?"Submit Assessment ✓":"Next Question →";
+
+    // Update dots
+    questions.forEach((_,i)=>{
+      const dot = document.getElementById("dot"+i);
+      dot.className = "step-dot"+(i<idx?" done":i===idx?" active":"");
+    });
+  }
+
+  document.getElementById("nextQBtn").onclick = async () => {
+    const answer = document.getElementById("answerArea").value.trim();
+    if (answer.length < 10) { toast("Please write a more detailed answer","error"); return; }
+    answers[currentQ] = answer;
+    if (currentQ < questions.length-1) {
+      showQuestion(currentQ+1);
+    } else {
+      await submitAssessment();
+    }
+  };
+
+  // ── Step 3: Submit to Firestore ───────────────────────────────
+  async function submitAssessment() {
+    show("stepSubmitting");
+
+    // AI evaluates the answers
+    const evalSys = `You are evaluating a web development student application for ENOVA Dev.
+
+Applicant: ${userInfo.name} (${userInfo.email})
+Reason: ${userInfo.why}
+
+Questions and Answers:
+${questions.map((q,i)=>`Q${i+1}: ${q.question}\nA${i+1}: ${answers[i]||"No answer"}`).join("\n\n")}
+
+Evaluate and respond ONLY with JSON:
+{
+  "score": <0-100 overall score>,
+  "recommendation": "<approve_free|approve_paid|reject>",
+  "summary": "<2-3 sentence admin summary of the applicant>",
+  "strengths": "<what impressed you>",
+  "concerns": "<any concerns or gaps>",
+  "aiDecision": "<brief reason for recommendation>"
+}
+Approve free (80+): Strong motivation, good thinking, promising. Approve paid (50-79): Average, could benefit. Reject (<50): Doesn't seem ready or genuine.`;
+
+    let evaluation = { score:50, recommendation:"approve_paid", summary:"Assessment submitted.", strengths:"Completed the test.", concerns:"None noted.", aiDecision:"Default evaluation." };
+
+    try {
+      const res = await fetch("/api/chat",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({systemPrompt:evalSys,messages:[{role:"user",content:"Evaluate this applicant."}],mode:"score"})
+      });
+      const data = await res.json();
+      evaluation = JSON.parse((data.reply||"{}").replace(/```json|```/g,"").trim());
+    } catch(e) { console.warn("Eval failed, using default"); }
+
+    // Save to Firestore under "applications" collection
+    try {
+      await addDoc(collection(db,"applications"),{
+        name: userInfo.name,
+        email: userInfo.email,
+        why: userInfo.why,
+        questions: questions.map(q=>q.question),
+        answers: answers,
+        aiScore: evaluation.score||50,
+        aiRecommendation: evaluation.recommendation||"approve_paid",
+        aiSummary: evaluation.summary||"",
+        aiStrengths: evaluation.strengths||"",
+        aiConcerns: evaluation.concerns||"",
+        aiDecision: evaluation.aiDecision||"",
+        status: "pending", // admin changes to: approved_free, approved_paid, rejected
+        submittedAt: serverTimestamp()
+      });
+    } catch(e) { console.error("Firestore save failed:", e); }
+
+    showResult(evaluation);
+  }
+
+  function showResult(evaluation) {
+    show("stepResult");
+    const score = evaluation.score||50;
+    const rec = evaluation.recommendation||"approve_paid";
+
+    let icon, title, msg, actions;
+
+    if (rec === "approve_free") {
+      icon = "🌟";
+      title = "Excellent Assessment!";
+      msg = "Your answers impressed our AI reviewer. Your application has been submitted and our team will review it shortly. If approved, you'll receive <strong style='color:var(--cyan)'>free full access</strong> to ENOVA Dev via email.";
+      actions = `<div style="text-align:center;color:var(--text-3);font-size:13px">📧 Check ${userInfo.email} for your approval email</div>`;
+    } else if (rec === "approve_paid") {
+      icon = "📚";
+      title = "Good Effort!";
+      msg = "You completed the assessment. Our team will review it. You can wait for approval or get <strong style='color:var(--cyan)'>instant access</strong> by subscribing.";
+      actions = `
+        <div class="payment-card">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:1px">INSTANT ACCESS</div>
+          <div class="payment-price">$9<span style="font-size:16px;color:var(--text-2)">/month</span></div>
+          <div class="payment-features">
+            <div class="payment-feature">Full access to all 22 lessons</div>
+            <div class="payment-feature">AI tutor with scoring system</div>
+            <div class="payment-feature">Downloadable certificate</div>
+            <div class="payment-feature">Cancel anytime</div>
+          </div>
+          <a href="signup.html?plan=paid" class="btn-primary" style="text-align:center;padding:13px">Get Instant Access →</a>
+        </div>
+        <div style="text-align:center;color:var(--text-3);font-size:12px">or wait for team review at ${userInfo.email}</div>`;
+    } else {
+      icon = "📝";
+      title = "Keep Learning First";
+      msg = "Based on your assessment, we recommend building some foundational knowledge first. You're welcome to try again in 7 days or get access now.";
+      actions = `
+        <div class="payment-card">
+          <div class="payment-price">$9<span style="font-size:16px;color:var(--text-2)">/month</span></div>
+          <div class="payment-features">
+            <div class="payment-feature">Start from absolute zero — no experience needed</div>
+            <div class="payment-feature">AI guides you at your own pace</div>
+            <div class="payment-feature">Cancel anytime</div>
+          </div>
+          <a href="signup.html?plan=paid" class="btn-primary" style="text-align:center;padding:13px">Join Anyway →</a>
+        </div>`;
+    }
+
+    document.getElementById("resultCard").innerHTML = `
+      <div class="result-icon">${icon}</div>
+      <div class="result-title">${title}</div>
+      <div class="result-msg">${msg}</div>
+      <div style="background:var(--bg-2);border-radius:var(--radius-sm);padding:16px;font-size:13px;color:var(--text-2);line-height:1.6;border-left:3px solid var(--violet)">
+        <strong style="color:var(--text)">AI Assessment:</strong> ${evaluation.summary||"Assessment complete."}
+      </div>
+      <div class="result-actions">${actions}</div>
+    `;
+  }
+</script>
+</body>
+</html>
