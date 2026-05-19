@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Entry Assessment — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <style>
+    body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--bg)}
+    .wrap{max-width:680px;width:100%;display:flex;flex-direction:column;gap:28px;animation:fadeUp 0.6s ease}
+    .logo{font-family:var(--font-display);font-size:20px;font-weight:800;text-align:center;margin-bottom:4px}
+    .logo span{color:var(--cyan)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;display:flex;flex-direction:column;gap:20px}
+    .step-title{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-0.5px}
+    .step-sub{font-size:14px;color:var(--text-2);line-height:1.7}
+    .q-num{font-family:var(--font-mono);font-size:11px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase}
+    .q-text{font-family:var(--font-display);font-size:17px;font-weight:700;line-height:1.4}
+    .q-hint{font-size:13px;color:var(--text-3);line-height:1.6;font-style:italic}
+    .answer{width:100%;min-height:130px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.7;resize:vertical;transition:var(--transition)}
+    .answer:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim);outline:none}
+    .progress-row{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--text-3)}
+    .dots{display:flex;gap:6px;justify-content:center}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--surface-2);transition:var(--transition)}
+    .dot.active{background:var(--cyan);transform:scale(1.4)}
+    .dot.done{background:var(--green)}
+    /* Pending screen */
+    .pending-icon{font-size:64px;text-align:center;animation:float 3s ease-in-out infinite}
+    .pending-title{font-family:var(--font-display);font-size:24px;font-weight:800;text-align:center;letter-spacing:-0.5px}
+    .pending-msg{font-size:14px;color:var(--text-2);line-height:1.8;text-align:center}
+    .status-box{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;display:flex;align-items:center;gap:12px}
+    .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:pulse-cyan 2s infinite}
+    /* Payment screen */
+    .pay-amount{font-family:var(--font-display);font-size:48px;font-weight:800;color:var(--cyan);text-align:center}
+    .pay-note{font-size:13px;color:var(--text-3);text-align:center;font-family:var(--font-mono)}
+    .card-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .cc-preview{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px}
+    .cc-chip{width:40px;height:28px;background:linear-gradient(135deg,var(--gold),#d97706);border-radius:4px}
+    .cc-number{font-family:var(--font-mono);font-size:18px;letter-spacing:3px;color:var(--text)}
+    .cc-bottom{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;color:var(--text-2)}
+  </style>
+</head>
+<body>
+
+<div class="wrap" id="wrap">
+
+  <!-- STEP 0: Info collection -->
+  <div id="s0">
+    <div class="logo">ENOVA<span>.</span>dev</div>
+    <div style="text-align:center;margin-bottom:8px">
+      <h1 style="font-family:var(--font-display);font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.1">Entry Assessment</h1>
+      <p style="font-size:15px;color:var(--text-2);margin-top:10px;line-height:1.7">Answer 5 questions from our AI. If you pass — <strong style="color:var(--cyan)">free access</strong>. If you don't — you'll be offered a paid plan. The admin reviews all applications personally.</p>
+    </div>
+    <div class="card">
+      <div class="input-group">
+        <label class="input-label">Full Name</label>
+        <input class="input-field" id="iName" type="text" placeholder="Your full name" autocomplete="name"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email Address</label>
+        <input class="input-field" id="iEmail" type="email" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Why do you want to learn web development?</label>
+        <textarea class="answer" id="iWhy" style="min-height:90px" placeholder="Tell us your story, goals, and what you want to build..."></textarea>
+      </div>
+      <button class="btn-primary" id="s0Next" style="width:100%;padding:14px;font-size:15px">Begin Assessment →</button>
+      <p style="font-size:12px;color:var(--text-3);text-align:center">Already have access? <a href="login.html" style="color:var(--cyan)">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- STEP 1: Generating questions -->
+  <div id="s1" style="display:none">
+    <div class="card" style="align-items:center;padding:48px">
+      <div class="spinner" style="width:36px;height:36px;border-width:3px"></div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-2);margin-top:16px">Generating your personalized questions...</div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Questions -->
+  <div id="s2" style="display:none">
+    <div class="dots" id="dots"></div>
+    <div class="card">
+      <div class="q-num" id="qNum">Question 1 of 5</div>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="q-hint" id="qHint"></div>
+      <textarea class="answer" id="qAns" placeholder="Type a detailed answer..."></textarea>
+      <div class="progress-row">
+        <span id="pLabel">1 / 5</span>
+        <span id="pPct">0%</span>
+      </div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="pFill" style="width:0%"></div></div>
+      <button class="btn-primary" id="qNext" style="width:100%;padding:13px">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Submitting -->
+  <div id="s3" style="display:none">
+    <div class="card" style="align-items:center;padding:48px;gap:16px">
+      <div class="spinner" style="width:36px;height:36px;border-width:3px"></div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-2)">Submitting your assessment...</div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Pending — waiting for admin -->
+  <div id="s4" style="display:none">
+    <div class="card" style="gap:24px">
+      <div class="pending-icon">⏳</div>
+      <div class="pending-title">Application Submitted!</div>
+      <div class="pending-msg">Your assessment has been sent to the ENOVA Dev team for manual review. <br/>The admin will personally review your answers and make a decision.<br/><br/>You'll receive an email at <strong style="color:var(--cyan)" id="pendingEmail">your@email.com</strong> with the result.</div>
+      <div class="status-box">
+        <div class="status-dot" style="background:var(--gold)"></div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:1px">STATUS</div>
+          <div style="font-size:14px;font-weight:600;margin-top:2px">Pending Admin Review</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text-3);text-align:center;line-height:1.7">Already have a decision? <a href="status.html" style="color:var(--cyan)">Check your application status →</a></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast-container" id="tc"></div>
+
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  onAuthStateChanged(auth, u => { if(u) window.location.href="dashboard.html"; });
+
+  function toast(m,t){const e=document.createElement("div");e.className="toast toast-"+(t||"info");e.innerHTML="<span>"+m+"</span>";document.getElementById("tc").appendChild(e);setTimeout(()=>e.remove(),4000);}
+  function show(id){["s0","s1","s2","s3","s4"].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?"block":"none";});}
+
+  let info={}, questions=[], answers=[], qi=0;
+
+  // Step 0 → generate questions
+  document.getElementById("s0Next").onclick = async () => {
+    const name=document.getElementById("iName").value.trim();
+    const email=document.getElementById("iEmail").value.trim();
+    const why=document.getElementById("iWhy").value.trim();
+    if(!name||!email||!why){toast("Please fill in all fields","error");return;}
+    if(!email.includes("@")){toast("Enter a valid email","error");return;}
+    info={name,email,why};
+    show("s1");
+    await genQuestions();
+  };
+
+  async function genQuestions(){
+    const sys=`You are an expert interviewer for a web development learning platform called ENOVA Dev.
+Generate exactly 5 deep assessment questions for this applicant.
+Assess: problem-solving mindset, current knowledge (any level), motivation, logical thinking, dedication.
+Applicant info: Name: ${info.name} | Goal: ${info.why}
+Return ONLY a JSON array (no markdown):
+[{"q":"<question>","hint":"<optional small context>"},...]
+Make questions progressively harder. Tailor to their goal.`;
+    try{
+      const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemPrompt:sys,messages:[{role:"user",content:"Generate questions."}],mode:"score"})});
+      const d=await r.json();
+      questions=JSON.parse((d.reply||"[]").replace(/```json|```/g,"").trim());
+      if(!Array.isArray(questions)||questions.length<3) throw new Error("bad");
+    }catch(e){
+      questions=[
+        {q:"What is web development to you, and why do you want to learn it right now?",hint:"Be specific about what excites you."},
+        {q:"If you had to explain what HTML does to a 10-year-old, how would you describe it?",hint:""},
+        {q:"You built a webpage but it looks wrong on mobile. Walk us through your debugging process.",hint:"Think step by step."},
+        {q:"What's the hardest thing you've ever learned, and how did you push through it?",hint:"Can be anything, not just tech."},
+        {q:"Where do you see yourself in 1 year if you master web development?",hint:"Be realistic and specific."}
+      ];
+    }
+    buildDots(); showQ(0); show("s2");
+  }
+
+  function buildDots(){
+    document.getElementById("dots").innerHTML=questions.map((_,i)=>'<div class="dot" id="d'+i+'"></div>').join("");
+  }
+
+  function showQ(i){
+    qi=i;
+    const q=questions[i];
+    const pct=Math.round((i/questions.length)*100);
+    document.getElementById("qNum").textContent="Question "+(i+1)+" of "+questions.length;
+    document.getElementById("qText").textContent=q.q||q.question||"";
+    document.getElementById("qHint").textContent=q.hint||q.subtitle||"";
+    document.getElementById("qAns").value=answers[i]||"";
+    document.getElementById("pLabel").textContent=(i+1)+" / "+questions.length;
+    document.getElementById("pPct").textContent=pct+"%";
+    document.getElementById("pFill").style.width=pct+"%";
+    document.getElementById("qNext").textContent=i===questions.length-1?"Submit Assessment ✓":"Next →";
+    questions.forEach((_,j)=>{
+      const d=document.getElementById("d"+j);
+      if(d) d.className="dot"+(j<i?" done":j===i?" active":"");
+    });
+    document.getElementById("qAns").focus();
+  }
+
+  document.getElementById("qNext").onclick = async () => {
+    const ans=document.getElementById("qAns").value.trim();
+    if(ans.length<15){toast("Please write a more detailed answer","error");return;}
+    answers[qi]=ans;
+    if(qi<questions.length-1){showQ(qi+1);}
+    else{await submitAssessment();}
+  };
+
+  async function submitAssessment(){
+    show("s3");
+    // AI pre-evaluates for admin convenience — but admin makes final call
+    const evalSys=`You are pre-evaluating a web dev student application for admin review.
+Applicant: ${info.name} (${info.email})
+Motivation: ${info.why}
+Q&A:
+${questions.map((q,i)=>`Q${i+1}: ${q.q||q.question}\nA: ${answers[i]||"No answer"}`).join("\n\n")}
+Respond ONLY with JSON:
+{"aiScore":<0-100>,"aiRecommendation":"<approve_free|approve_paid|reject>","summary":"<2-3 sentences for admin>","strengths":"<what stood out>","concerns":"<gaps or red flags>"}
+This is ONLY a suggestion for the admin. Admin makes the final decision.`;
+    let ev={aiScore:50,aiRecommendation:"approve_paid",summary:"Assessment submitted.",strengths:"Completed all questions.",concerns:"Admin review needed."};
+    try{
+      const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemPrompt:evalSys,messages:[{role:"user",content:"Pre-evaluate."}],mode:"score"})});
+      const d=await r.json();
+      ev=JSON.parse((d.reply||"{}").replace(/```json|```/g,"").trim());
+    }catch(e){console.warn("eval failed");}
+
+    try{
+      await addDoc(collection(db,"applications"),{
+        name:info.name, email:info.email, why:info.why,
+        questions:questions.map(q=>q.q||q.question||""),
+        answers,
+        aiScore:ev.aiScore||50,
+        aiRecommendation:ev.aiRecommendation||"approve_paid",
+        aiSummary:ev.summary||"",
+        aiStrengths:ev.strengths||"",
+        aiConcerns:ev.concerns||"",
+        status:"pending",         // admin changes to: approved_free | approved_paid:{amount} | rejected
+        adminFee:null,            // admin sets fee amount if approved_paid
+        submittedAt:serverTimestamp()
+      });
+    }catch(e){console.error("Firestore:",e);}
+
+    document.getElementById("pendingEmail").textContent=info.email;
+    show("s4");
+  }
+</script>
+</body>
+</html>
