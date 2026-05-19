@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <style>
+    body{background:var(--bg)}
+    .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+    .sidebar{background:var(--bg-2);border-right:1px solid var(--border);padding:24px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+    .a-logo{font-family:var(--font-display);font-size:17px;font-weight:800;padding:0 8px;margin-bottom:28px}
+    .a-logo span{color:var(--cyan)}
+    .a-logo small{display:block;font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:2px;margin-top:2px}
+    .nav-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:var(--text-2);font-family:var(--font-display);font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;width:100%;transition:var(--transition)}
+    .nav-btn:hover{background:var(--surface);color:var(--text)}
+    .nav-btn.active{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,0.15)}
+    .nb{margin-left:auto;padding:2px 7px;border-radius:999px;font-size:10px;font-family:var(--font-mono);font-weight:700}
+    .nb-yellow{background:var(--gold-dim);color:var(--gold)}
+    .nb-gray{background:var(--surface-2);color:var(--text-3)}
+    .main{padding:36px 44px;display:flex;flex-direction:column;gap:24px;overflow-y:auto}
+    .page-header{display:flex;align-items:center;justify-content:space-between}
+    .page-title{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-0.5px}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 22px}
+    .stat-n{font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:-1px}
+    .stat-l{font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:3px}
+    .ftabs{display:flex;gap:8px;flex-wrap:wrap}
+    .ftab{padding:7px 14px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-2);transition:var(--transition)}
+    .ftab.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+    .apps{display:flex;flex-direction:column;gap:10px}
+    /* App card */
+    .acard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition)}
+    .acard:hover{border-color:var(--border-hover)}
+    .acard-top{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer}
+    .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--violet));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--bg);flex-shrink:0}
+    .ainfo{flex:1}
+    .aname{font-family:var(--font-display);font-size:14px;font-weight:700}
+    .aemail{font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:2px}
+    .ameta{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+    .sbadge{padding:3px 9px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700}
+    .s-pending{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+    .s-approved_free{background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.2)}
+    .s-approved_paid,.s-pending_payment{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,0.2)}
+    .s-paid{background:rgba(16,185,129,0.2);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+    .s-rejected{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)}
+    .atime{font-size:11px;color:var(--text-3);font-family:var(--font-mono);text-align:right;flex-shrink:0}
+    .adetail{border-top:1px solid var(--border);padding:22px;display:none;flex-direction:column;gap:18px}
+    .adetail.open{display:flex}
+    .sec-title{font-family:var(--font-mono);font-size:10px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+    .qa{display:flex;flex-direction:column;gap:8px}
+    .qi{background:var(--bg-2);border-radius:var(--radius-sm);padding:12px 14px;border-left:3px solid var(--cyan)}
+    .qq{font-size:12px;color:var(--text-3);margin-bottom:4px}
+    .qa-ans{font-size:13px;color:var(--text);line-height:1.6}
+    .eval-box{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;flex-direction:column;gap:8px}
+    .eval-row{display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;gap:12px}
+    .eval-k{color:var(--text-3);font-family:var(--font-mono);font-size:10px;letter-spacing:0.5px;flex-shrink:0;padding-top:2px}
+    .eval-v{color:var(--text);text-align:right;line-height:1.5}
+    /* Action panel */
+    .action-panel{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;display:flex;flex-direction:column;gap:14px}
+    .action-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .fee-input{width:100px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:14px;font-weight:700}
+    .fee-input:focus{border-color:var(--cyan);outline:none}
+    .btn-free{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:9px 18px;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition)}
+    .btn-free:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(16,185,129,0.4)}
+    .btn-paid{background:linear-gradient(135deg,var(--cyan),#0099bb);color:var(--bg);border:none;padding:9px 18px;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition)}
+    .btn-paid:hover{transform:translateY(-1px);box-shadow:0 4px 14px var(--cyan-glow)}
+    .btn-rej{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:9px 18px;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition)}
+    .btn-rej:hover{background:rgba(239,68,68,0.2)}
+    .note-area{width:100%;min-height:60px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font-body);resize:none}
+    /* Login gate */
+    .login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+    .login-box{max-width:380px;width:100%;display:flex;flex-direction:column;gap:20px}
+    .empty{text-align:center;padding:60px 20px;color:var(--text-3)}
+    .empty-icon{font-size:48px;margin-bottom:12px}
+    .tloading{display:flex;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--text-2)}
+    @media(max-width:860px){.layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:20px 16px}.stats{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+
+<!-- Login gate -->
+<div id="loginGate" class="login-gate">
+  <div class="login-box">
+    <div style="text-align:center">
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:6px">ENOVA<span style="color:var(--cyan)">.</span>dev</div>
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--cyan);letter-spacing:2px">ADMIN PANEL</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;display:flex;flex-direction:column;gap:16px">
+      <div class="input-group">
+        <label class="input-label">Admin Email</label>
+        <input class="input-field" id="lgEmail" type="email" placeholder="admin@example.com"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <input class="input-field" id="lgPass" type="password" placeholder="••••••••"/>
+      </div>
+      <button class="btn-primary" id="lgBtn" style="padding:13px">Sign In</button>
+      <p style="font-size:12px;color:var(--text-3);text-align:center">Only authorized admin accounts can access this.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Admin panel -->
+<div id="adminPanel" style="display:none">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="a-logo">ENOVA<span>.</span>dev<small>ADMIN PANEL</small></div>
+      <button class="nav-btn active" id="nb-apps" onclick="switchTab('apps')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Applications
+        <span class="nb nb-yellow" id="pendingCount">0</span>
+      </button>
+      <button class="nav-btn" id="nb-paid" onclick="switchTab('paid')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Payments
+        <span class="nb nb-gray" id="paidCount">0</span>
+      </button>
+      <button class="nav-btn" id="nb-approved" onclick="switchTab('approved')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+        Approved
+        <span class="nb nb-gray" id="approvedCount">0</span>
+      </button>
+      <button class="nav-btn" id="nb-rejected" onclick="switchTab('rejected')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Rejected
+        <span class="nb nb-gray" id="rejectedCount">0</span>
+      </button>
+      <button class="nav-btn" id="lgOutBtn" style="margin-top:auto;color:#ef4444">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <div class="page-title" id="pageTitle">Applications</div>
+          <div style="font-size:12px;color:var(--text-3);font-family:var(--font-mono);margin-top:3px" id="pageSubtitle">Pending review</div>
+        </div>
+        <button class="btn-ghost" onclick="loadApps()" style="font-size:13px">↺ Refresh</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-n" style="color:var(--cyan)" id="sTotal">0</div><div class="stat-l">Total Applications</div></div>
+        <div class="stat"><div class="stat-n" style="color:var(--gold)" id="sPending">0</div><div class="stat-l">Pending Review</div></div>
+        <div class="stat"><div class="stat-n" style="color:#10b981" id="sApproved">0</div><div class="stat-l">Approved</div></div>
+        <div class="stat"><div class="stat-n" style="color:#ef4444" id="sRejected">0</div><div class="stat-l">Rejected</div></div>
+      </div>
+
+      <div class="ftabs" id="ftabs">
+        <button class="ftab on" onclick="setFilter('all',this)">All</button>
+        <button class="ftab" onclick="setFilter('pending',this)">Pending</button>
+        <button class="ftab" onclick="setFilter('approved_free',this)">Free</button>
+        <button class="ftab" onclick="setFilter('approved_paid',this)">Approved Paid</button>
+        <button class="ftab" onclick="setFilter('paid',this)">Paid ✓</button>
+        <button class="ftab" onclick="setFilter('rejected',this)">Rejected</button>
+      </div>
+
+      <div class="apps" id="appsContainer">
+        <div class="tloading"><div class="spinner"></div><span>Loading...</span></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast-container" id="tc"></div>
+
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { collection, getDocs, doc, updateDoc, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── CHANGE THIS to your admin email ──────────────────────────
+  const ADMIN_EMAIL = "admin@enovadev.com";
+
+  function toast(m,t){const e=document.createElement("div");e.className="toast toast-"+(t||"info");e.innerHTML="<span>"+m+"</span>";document.getElementById("tc").appendChild(e);setTimeout(()=>e.remove(),4000);}
+
+  let allApps=[], currentFilter="all", adminUser=null;
+
+  onAuthStateChanged(auth, async u => {
+    if (u && u.email===ADMIN_EMAIL) {
+      adminUser=u;
+      document.getElementById("loginGate").style.display="none";
+      document.getElementById("adminPanel").style.display="block";
+      await loadApps();
+    } else {
+      document.getElementById("loginGate").style.display="flex";
+      document.getElementById("adminPanel").style.display="none";
+    }
+  });
+
+  document.getElementById("lgBtn").onclick = async () => {
+    const email=document.getElementById("lgEmail").value.trim();
+    const pass=document.getElementById("lgPass").value;
+    if(!email||!pass){toast("Fill in both fields","error");return;}
+    document.getElementById("lgBtn").textContent="Signing in...";
+    try{
+      await signInWithEmailAndPassword(auth,email,pass);
+    }catch(e){
+      toast(e.code==="auth/wrong-password"?"Wrong password":e.code==="auth/user-not-found"?"No account found":"Login failed: "+e.message,"error");
+      document.getElementById("lgBtn").textContent="Sign In";
+    }
+  };
+
+  document.getElementById("lgOutBtn").onclick = ()=>signOut(auth);
+
+  window.loadApps = async function() {
+    document.getElementById("appsContainer").innerHTML='<div class="tloading"><div class="spinner"></div><span>Loading...</span></div>';
+    try{
+      const q=query(collection(db,"applications"),orderBy("submittedAt","desc"));
+      const snap=await getDocs(q);
+      allApps=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      renderApps();
+    }catch(e){
+      document.getElementById("appsContainer").innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Failed: '+e.message+'</p></div>';
+    }
+  };
+
+  function updateStats(){
+    const total=allApps.length;
+    const pending=allApps.filter(a=>a.status==="pending").length;
+    const approved=allApps.filter(a=>["approved_free","approved_paid","paid"].includes(a.status)).length;
+    const rejected=allApps.filter(a=>a.status==="rejected").length;
+    const paid=allApps.filter(a=>a.status==="paid").length;
+    document.getElementById("sTotal").textContent=total;
+    document.getElementById("sPending").textContent=pending;
+    document.getElementById("sApproved").textContent=approved;
+    document.getElementById("sRejected").textContent=rejected;
+    document.getElementById("pendingCount").textContent=pending;
+    document.getElementById("paidCount").textContent=paid;
+    document.getElementById("approvedCount").textContent=approved;
+    document.getElementById("rejectedCount").textContent=rejected;
+  }
+
+  window.setFilter=function(f,el){
+    currentFilter=f;
+    document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("on"));
+    if(el)el.classList.add("on");
+    renderApps();
+  };
+
+  window.switchTab=function(tab){
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    document.getElementById("nb-"+tab)?.classList.add("active");
+    const map={apps:{title:"Applications",sub:"Pending review",filter:"pending"},paid:{title:"Payments",sub:"Completed payments",filter:"paid"},approved:{title:"Approved Users",sub:"Approved for access",filter:"approved_free"},rejected:{title:"Rejected",sub:"Not approved",filter:"rejected"}};
+    const m=map[tab]||{title:"Applications",sub:"",filter:"all"};
+    document.getElementById("pageTitle").textContent=m.title;
+    document.getElementById("pageSubtitle").textContent=m.sub;
+    setFilter(m.filter,null);
+  };
+
+  function renderApps(){
+    const filtered=currentFilter==="all"?allApps:allApps.filter(a=>a.status===currentFilter);
+    const c=document.getElementById("appsContainer");
+    if(!filtered.length){c.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>No applications here.</p></div>';return;}
+    c.innerHTML=filtered.map(app=>buildCard(app)).join("");
+    filtered.forEach(app=>{
+      document.getElementById("hdr-"+app.id).onclick=()=>document.getElementById("det-"+app.id).classList.toggle("open");
+      document.getElementById("btn-free-"+app.id)?.addEventListener("click",e=>{e.stopPropagation();approve(app.id,"free");});
+      document.getElementById("btn-paid-"+app.id)?.addEventListener("click",e=>{e.stopPropagation();approve(app.id,"paid",app.id);});
+      document.getElementById("btn-rej-"+app.id)?.addEventListener("click",e=>{e.stopPropagation();reject(app.id);});
+      document.getElementById("btn-note-"+app.id)?.addEventListener("click",e=>{e.stopPropagation();saveNote(app.id);});
+    });
+  }
+
+  function buildCard(app){
+    const score=app.aiScore||0;
+    const scl=score>=80?"s-approved_free":score>=60?"s-approved_paid":"s-rejected";
+    const stl="s-"+(app.status||"pending");
+    const slbl={pending:"Pending",approved_free:"Free Access",approved_paid:"Approved — Awaiting Payment",paid:"Paid ✓",rejected:"Rejected"}[app.status]||app.status;
+    const time=app.submittedAt?.seconds?new Date(app.submittedAt.seconds*1000).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"—";
+    const init=(app.name||"?").charAt(0).toUpperCase();
+    const isDone=app.status!=="pending";
+    const qa=(app.questions||[]).map((q,i)=>`<div class="qi"><div class="qq">Q${i+1}: ${q}</div><div class="qa-ans">${app.answers?.[i]||'<em style="color:var(--text-3)">No answer</em>'}</div></div>`).join("");
+    const payDetails=app.paymentDetails?`<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-sm);padding:14px;display:flex;flex-direction:column;gap:6px"><div style="font-family:var(--font-mono);font-size:10px;color:#10b981;letter-spacing:1px;margin-bottom:4px">PAYMENT RECEIVED</div><div style="font-size:13px">Card: •••• •••• •••• ${app.paymentDetails.cardLast4||"?????"}</div><div style="font-size:13px">Holder: ${app.paymentDetails.cardHolder||"—"}</div><div style="font-size:13px">Expiry: ${app.paymentDetails.cardExpiry||"—"}</div><div style="font-size:13px;color:var(--gold)">Fee paid: $${app.paymentDetails.fee||app.adminFee||0}</div></div>`:"";
+
+    return `<div class="acard">
+      <div class="acard-top" id="hdr-${app.id}">
+        <div class="av">${init}</div>
+        <div class="ainfo">
+          <div class="aname">${app.name||"Unknown"}</div>
+          <div class="aemail">${app.email||""}</div>
+          <div class="ameta">
+            <span class="sbadge ${scl}">AI ${score}/100</span>
+            <span class="sbadge ${stl}">${slbl}</span>
+            ${app.adminFee?`<span class="sbadge s-approved_paid">Fee: $${app.adminFee}</span>`:""}
+          </div>
+        </div>
+        <div class="atime">${time}<br/><span style="color:var(--text-3);font-size:10px">▼ expand</span></div>
+      </div>
+      <div class="adetail" id="det-${app.id}">
+        <div>
+          <div class="sec-title">Why they want to join</div>
+          <div style="font-size:13px;color:var(--text-2);line-height:1.7;background:var(--bg-2);padding:12px;border-radius:var(--radius-sm)">${app.why||"—"}</div>
+        </div>
+        <div>
+          <div class="sec-title">AI Pre-Evaluation</div>
+          <div class="eval-box">
+            <div class="eval-row"><span class="eval-k">SUMMARY</span><span class="eval-v">${app.aiSummary||"—"}</span></div>
+            <div style="height:1px;background:var(--border)"></div>
+            <div class="eval-row"><span class="eval-k">STRENGTHS</span><span class="eval-v" style="color:#10b981">${app.aiStrengths||"—"}</span></div>
+            <div class="eval-row"><span class="eval-k">CONCERNS</span><span class="eval-v" style="color:var(--gold)">${app.aiConcerns||"—"}</span></div>
+            <div class="eval-row"><span class="eval-k">AI SAYS</span><span class="eval-v" style="font-family:var(--font-mono);font-size:11px">${app.aiRecommendation||"—"}</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-title">Assessment Answers (${(app.answers||[]).length} questions)</div>
+          <div class="qa">${qa}</div>
+        </div>
+        ${payDetails?`<div><div class="sec-title">Payment Details</div>${payDetails}</div>`:""}
+        <div class="action-panel">
+          <div class="sec-title">Admin Decision</div>
+          ${isDone?`<div style="font-size:13px;color:var(--text-3);font-family:var(--font-mono)">Decision: ${slbl} ${app.adminFee?'· Fee: $'+app.adminFee:''}</div>`:`
+          <div class="action-row">
+            <button class="btn-free" id="btn-free-${app.id}">✓ Approve Free</button>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--text-3);font-family:var(--font-mono)">$</span>
+              <input class="fee-input" id="fee-${app.id}" type="number" placeholder="9" min="1" max="999" value="9"/>
+              <button class="btn-paid" id="btn-paid-${app.id}">💳 Approve Paid</button>
+            </div>
+            <button class="btn-rej" id="btn-rej-${app.id}">✕ Reject</button>
+          </div>`}
+          <div>
+            <div style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-bottom:6px">ADMIN NOTE (visible to user if rejected)</div>
+            <textarea class="note-area" id="note-${app.id}" placeholder="Add a note...">${app.adminNote||""}</textarea>
+          </div>
+          <button class="btn-note btn-ghost" id="btn-note-${app.id}" style="align-self:flex-start;padding:8px 16px;font-size:12px">💾 Save Note</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function approve(id, type, cardId){
+    const app=allApps.find(a=>a.id===id);
+    if(!app) return;
+    let fee=null, status="approved_free";
+    if(type==="paid"){
+      const feeInput=document.getElementById("fee-"+id);
+      fee=parseFloat(feeInput?.value||9);
+      if(isNaN(fee)||fee<1){toast("Enter a valid fee amount","error");return;}
+      status="approved_paid";
+    }
+    try{
+      await updateDoc(doc(db,"applications",id),{
+        status, adminFee:fee, reviewedAt:serverTimestamp(), reviewedBy:adminUser?.email||"admin"
+      });
+      app.status=status; app.adminFee=fee;
+      updateStats(); renderApps();
+      toast(type==="free"?"Approved for free access!":"Approved — user will be prompted to pay $"+fee,"success");
+    }catch(e){toast("Error: "+e.message,"error");}
+  }
+
+  async function reject(id){
+    const note=document.getElementById("note-"+id)?.value||"";
+    try{
+      await updateDoc(doc(db,"applications",id),{
+        status:"rejected", adminNote:note, reviewedAt:serverTimestamp(), reviewedBy:adminUser?.email||"admin"
+      });
+      const app=allApps.find(a=>a.id===id);
+      if(app){app.status="rejected";app.adminNote=note;}
+      updateStats(); renderApps();
+      toast("Application rejected","info");
+    }catch(e){toast("Error: "+e.message,"error");}
+  }
+
+  window.saveNote=async function(id){
+    const note=document.getElementById("note-"+id)?.value||"";
+    try{
+      await updateDoc(doc(db,"applications",id),{adminNote:note});
+      const app=allApps.find(a=>a.id===id);
+      if(app)app.adminNote=note;
+      toast("Note saved","success");
+    }catch(e){toast("Error","error");}
+  };
+
+  // Enter key for login
+  document.getElementById("lgPass").onkeydown=e=>{if(e.key==="Enter")document.getElementById("lgBtn").click();};
+</script>
+</body>
+</html>

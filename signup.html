@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+</head>
+<body class="auth-body">
+
+<div class="auth-bg">
+  <div class="auth-orb auth-orb-1"></div>
+  <div class="auth-orb auth-orb-2"></div>
+</div>
+
+<div class="auth-layout">
+  <!-- Left panel -->
+  <div class="auth-left">
+    <a href="index.html" class="nav-logo" style="margin-bottom:48px;display:block;">ENOVA<span>.</span>dev</a>
+    <h1 class="auth-tagline">Start<br/><span>Building<br/>Today.</span></h1>
+    <p class="auth-quote">Join ENOVA Dev and learn HTML, CSS & JavaScript with an AI tutor by your side.</p>
+    <div class="auth-features">
+      <div class="auth-feature"><span>⚡</span> Live code editor</div>
+      <div class="auth-feature"><span>🤖</span> AI tutor in your editor</div>
+      <div class="auth-feature"><span>📜</span> Real certificates</div>
+      <div class="auth-feature"><span>🆓</span> 100% free forever</div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="auth-right">
+    <div class="auth-card">
+      <div style="margin-bottom:8px">
+        <h2 style="font-family:var(--font-display);font-size:24px;font-weight:800;letter-spacing:-0.5px">Create your account</h2>
+        <p style="font-size:13px;color:var(--text-3);margin-top:6px">Already have one? <a href="login.html" style="color:var(--cyan)">Sign in</a></p>
+      </div>
+
+      <!-- Method selector -->
+      <div class="method-selector">
+        <button class="method-btn active" id="methodEmail" onclick="switchMethod('email')">Email</button>
+        <button class="method-btn" id="methodPhone" onclick="switchMethod('phone')">Phone</button>
+      </div>
+
+      <!-- Google -->
+      <button class="google-btn" id="googleBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <!-- Email Form -->
+      <div id="emailForm">
+        <div class="input-group">
+          <label class="input-label">Full Name</label>
+          <input class="input-field" id="nameInput" type="text" placeholder="Your name" autocomplete="name"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Email Address</label>
+          <input class="input-field" id="emailInput" type="email" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Password</label>
+          <div class="input-pw-wrap">
+            <input class="input-field" id="passwordInput" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
+            <button class="pw-toggle" onclick="togglePassword()" type="button">👁</button>
+          </div>
+        </div>
+        <button class="btn-primary auth-submit" id="emailSubmit" onclick="handleSignup()">
+          <span id="emailBtnText">Create Account</span>
+          <div class="spinner" id="emailSpinner" style="display:none"></div>
+        </button>
+      </div>
+
+      <!-- Phone Form -->
+      <div id="phoneForm" style="display:none">
+        <div id="otpStep1">
+          <div class="input-group">
+            <label class="input-label">Phone Number</label>
+            <input class="input-field" id="phoneInput" type="tel" placeholder="+1 234 567 8900"/>
+          </div>
+          <button class="btn-primary auth-submit" id="sendOtpBtn" onclick="handleSendOTP()">
+            <span id="otpBtnText">Send OTP</span>
+            <div class="spinner" id="otpSpinner" style="display:none"></div>
+          </button>
+        </div>
+        <div id="otpStep2" style="display:none">
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Enter the 6-digit code sent to <span id="phoneSent" style="color:var(--cyan)"></span></p>
+          <div class="otp-inputs">
+            <input class="otp-input" type="text" maxlength="1" data-index="0"/>
+            <input class="otp-input" type="text" maxlength="1" data-index="1"/>
+            <input class="otp-input" type="text" maxlength="1" data-index="2"/>
+            <input class="otp-input" type="text" maxlength="1" data-index="3"/>
+            <input class="otp-input" type="text" maxlength="1" data-index="4"/>
+            <input class="otp-input" type="text" maxlength="1" data-index="5"/>
+          </div>
+          <button class="btn-primary auth-submit" onclick="handleVerifyOTP()">
+            <span>Verify & Create Account</span>
+            <div class="spinner" id="verifySpinner" style="display:none"></div>
+          </button>
+          <button class="btn-ghost" style="width:100%;margin-top:8px;" onclick="resetPhone()">← Change number</button>
+        </div>
+        <div id="recaptcha-container"></div>
+      </div>
+
+      <p class="auth-footer-text">
+        By creating an account you agree to ENOVA Dev's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+
+<script type="module">
+  import { signInWithGoogle, signUpWithEmail, sendOTP, verifyOTP, setupRecaptcha, requireGuest } from "./js/auth.js";
+  import { showToast } from "./js/toast.js";
+
+  requireGuest("/dashboard.html");
+
+  // Check URL params — only approved users can sign up
+  const params = new URLSearchParams(window.location.search);
+  const approved = params.get("approved");
+  const approvedEmail = params.get("email");
+  if (!approved) {
+    // Not coming from approved flow — redirect to test
+    window.location.href = "test.html";
+  }
+  // Pre-fill email if provided
+  if (approvedEmail) {
+    setTimeout(() => {
+      const emailInput = document.getElementById("emailInput");
+      if (emailInput) { emailInput.value = approvedEmail; emailInput.readOnly = true; }
+    }, 100);
+  }
+
+  let currentMethod = "email";
+
+  window.switchMethod = (method) => {
+    currentMethod = method;
+    document.getElementById("methodEmail").classList.toggle("active", method === "email");
+    document.getElementById("methodPhone").classList.toggle("active", method === "phone");
+    document.getElementById("emailForm").style.display = method === "email" ? "flex" : "none";
+    document.getElementById("phoneForm").style.display = method === "phone" ? "flex" : "none";
+    if (method === "phone") setTimeout(() => setupRecaptcha("recaptcha-container"), 100);
+  };
+
+  window.togglePassword = () => {
+    const pw = document.getElementById("passwordInput");
+    pw.type = pw.type === "password" ? "text" : "password";
+  };
+
+  window.handleSignup = async () => {
+    const name = document.getElementById("nameInput").value.trim();
+    const email = document.getElementById("emailInput").value.trim();
+    const password = document.getElementById("passwordInput").value;
+    if (!name) return showToast("Enter your name", "error");
+    if (!email) return showToast("Enter your email", "error");
+    if (password.length < 6) return showToast("Password must be at least 6 characters", "error");
+    setLoading(true);
+    try {
+      await signUpWithEmail(name, email, password);
+      showToast("Account created! Welcome to ENOVA Dev 🎉", "success");
+      setTimeout(() => window.location.href = "dashboard.html", 800);
+    } catch (err) {
+      setLoading(false);
+      const msg = err.code === "auth/email-already-in-use" ? "Email already in use. Try signing in." :
+                  err.code === "auth/invalid-email" ? "Invalid email address" :
+                  err.code === "auth/weak-password" ? "Password too weak" : "Signup failed. Try again.";
+      showToast(msg, "error");
+    }
+  };
+
+  window.handleSendOTP = async () => {
+    const phone = document.getElementById("phoneInput").value.trim();
+    if (!phone) return showToast("Enter a phone number", "error");
+    document.getElementById("otpSpinner").style.display = "block";
+    document.getElementById("otpBtnText").style.display = "none";
+    try {
+      await sendOTP(phone);
+      document.getElementById("phoneSent").textContent = phone;
+      document.getElementById("otpStep1").style.display = "none";
+      document.getElementById("otpStep2").style.display = "flex";
+      showToast("OTP sent!", "success");
+      setupOTPInputs();
+    } catch { showToast("Failed to send OTP.", "error"); }
+    document.getElementById("otpSpinner").style.display = "none";
+    document.getElementById("otpBtnText").style.display = "inline";
+  };
+
+  window.handleVerifyOTP = async () => {
+    const code = Array.from(document.querySelectorAll(".otp-input")).map(i => i.value).join("");
+    if (code.length < 6) return showToast("Enter the full 6-digit code", "error");
+    document.getElementById("verifySpinner").style.display = "block";
+    try {
+      await verifyOTP(code);
+      showToast("Account created! 🎉", "success");
+      setTimeout(() => window.location.href = "dashboard.html", 800);
+    } catch { showToast("Invalid code.", "error"); }
+    document.getElementById("verifySpinner").style.display = "none";
+  };
+
+  window.resetPhone = () => {
+    document.getElementById("otpStep1").style.display = "flex";
+    document.getElementById("otpStep2").style.display = "none";
+  };
+
+  document.getElementById("googleBtn").addEventListener("click", async () => {
+    try {
+      await signInWithGoogle();
+      showToast("Welcome to ENOVA Dev! 🎉", "success");
+      setTimeout(() => window.location.href = "dashboard.html", 800);
+    } catch { showToast("Google sign-in failed.", "error"); }
+  });
+
+  function setLoading(on) {
+    document.getElementById("emailSpinner").style.display = on ? "block" : "none";
+    document.getElementById("emailBtnText").style.display = on ? "none" : "inline";
+    document.getElementById("emailSubmit").disabled = on;
+  }
+
+  function setupOTPInputs() {
+    const inputs = document.querySelectorAll(".otp-input");
+    inputs.forEach((input, i) => {
+      input.addEventListener("input", () => { if (input.value && i < inputs.length - 1) inputs[i + 1].focus(); });
+      input.addEventListener("keydown", (e) => { if (e.key === "Backspace" && !input.value && i > 0) inputs[i - 1].focus(); });
+    });
+    inputs[0].focus();
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && currentMethod === "email") window.handleSignup();
+  });
+</script>
+</body>
+</html>

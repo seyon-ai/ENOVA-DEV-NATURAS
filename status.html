@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Application Status — ENOVA Dev</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <style>
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+    .wrap{max-width:560px;width:100%;display:flex;flex-direction:column;gap:24px;animation:fadeUp 0.5s ease}
+    .logo{font-family:var(--font-display);font-size:20px;font-weight:800;text-align:center}
+    .logo span{color:var(--cyan)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;display:flex;flex-direction:column;gap:20px}
+    .status-icon{font-size:56px;text-align:center}
+    .status-title{font-family:var(--font-display);font-size:24px;font-weight:800;text-align:center;letter-spacing:-0.5px}
+    .status-msg{font-size:14px;color:var(--text-2);line-height:1.8;text-align:center}
+    .status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-family:var(--font-mono);font-size:12px;font-weight:600;margin:0 auto}
+    .pill-pending{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.3)}
+    .pill-free{background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+    .pill-paid{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,0.2)}
+    .pill-rejected{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)}
+    /* Payment form */
+    .pay-header{text-align:center}
+    .pay-amount{font-family:var(--font-display);font-size:52px;font-weight:800;color:var(--cyan)}
+    .pay-desc{font-size:13px;color:var(--text-3);margin-top:4px;font-family:var(--font-mono)}
+    .cc-card{background:linear-gradient(135deg,#0d0d1a,#1a1a2e);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:18px}
+    .cc-chip{width:42px;height:30px;background:linear-gradient(135deg,var(--gold),#b45309);border-radius:5px}
+    .cc-num{font-family:var(--font-mono);font-size:20px;letter-spacing:4px;color:var(--text);min-height:28px}
+    .cc-row{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;color:var(--text-2)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .pay-features{display:flex;flex-direction:column;gap:8px}
+    .pay-feat{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-2)}
+    .pay-feat::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--text-3);font-family:var(--font-mono)}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">ENOVA<span>.</span>dev</div>
+
+  <!-- Email lookup -->
+  <div id="lookupCard" class="card">
+    <div style="font-family:var(--font-display);font-size:20px;font-weight:800">Check Your Status</div>
+    <div style="font-size:14px;color:var(--text-2)">Enter the email you used when applying.</div>
+    <div class="input-group">
+      <label class="input-label">Email Address</label>
+      <input class="input-field" id="lookupEmail" type="email" placeholder="your@email.com"/>
+    </div>
+    <button class="btn-primary" id="lookupBtn" style="padding:13px">Check Status →</button>
+    <p style="font-size:12px;color:var(--text-3);text-align:center">Haven't applied yet? <a href="test.html" style="color:var(--cyan)">Take the assessment →</a></p>
+  </div>
+
+  <!-- Result card (hidden initially) -->
+  <div id="resultCard" style="display:none" class="card">
+    <!-- Filled by JS -->
+  </div>
+
+  <!-- Payment card (hidden initially) -->
+  <div id="payCard" style="display:none" class="card">
+    <div class="pay-header">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--cyan);letter-spacing:1px;margin-bottom:12px">ONE-TIME FEE</div>
+      <div class="pay-amount" id="payAmount">$0</div>
+      <div class="pay-desc" id="payDesc">Set by ENOVA Dev admin</div>
+    </div>
+
+    <div class="pay-features">
+      <div class="pay-feat">Full access to all 22 lessons</div>
+      <div class="pay-feat">AI tutor with scoring system</div>
+      <div class="pay-feat">Locked lessons unlock as you progress</div>
+      <div class="pay-feat">Downloadable certificate on completion</div>
+    </div>
+
+    <!-- Card preview -->
+    <div class="cc-card">
+      <div class="cc-chip"></div>
+      <div class="cc-num" id="ccPreview">•••• •••• •••• ••••</div>
+      <div class="cc-row">
+        <div><div style="font-size:10px;color:var(--text-3);margin-bottom:2px">CARD HOLDER</div><div id="ccNamePrev">YOUR NAME</div></div>
+        <div><div style="font-size:10px;color:var(--text-3);margin-bottom:2px">EXPIRES</div><div id="ccExpPrev">MM/YY</div></div>
+      </div>
+    </div>
+
+    <!-- Card fields -->
+    <div class="input-group">
+      <label class="input-label">Card Holder Name</label>
+      <input class="input-field" id="ccName" type="text" placeholder="Full name on card" autocomplete="cc-name"/>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Card Number</label>
+      <input class="input-field" id="ccNumber" type="text" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number"/>
+    </div>
+    <div class="field-row">
+      <div class="input-group">
+        <label class="input-label">Expiry</label>
+        <input class="input-field" id="ccExp" type="text" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">CVV</label>
+        <input class="input-field" id="ccCvv" type="text" placeholder="•••" maxlength="4" autocomplete="cc-csc"/>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="payBtn" style="padding:14px;font-size:15px">
+      Pay & Get Access
+    </button>
+    <div class="secure-note">🔒 Card details sent securely to admin</div>
+  </div>
+
+</div>
+
+<div class="toast-container" id="tc"></div>
+
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  onAuthStateChanged(auth, u => { if(u) window.location.href="dashboard.html"; });
+
+  function toast(m,t){const e=document.createElement("div");e.className="toast toast-"+(t||"info");e.innerHTML="<span>"+m+"</span>";document.getElementById("tc").appendChild(e);setTimeout(()=>e.remove(),4000);}
+
+  let appData = null;
+
+  // ── Lookup by email ────────────────────────────────────────────
+  document.getElementById("lookupBtn").onclick = async () => {
+    const email = document.getElementById("lookupEmail").value.trim().toLowerCase();
+    if (!email||!email.includes("@")) { toast("Enter a valid email","error"); return; }
+    document.getElementById("lookupBtn").textContent = "Checking...";
+    document.getElementById("lookupBtn").disabled = true;
+    try {
+      const q = query(collection(db,"applications"), where("email","==",email));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        toast("No application found for this email. Have you taken the assessment?","error");
+        document.getElementById("lookupBtn").textContent = "Check Status →";
+        document.getElementById("lookupBtn").disabled = false;
+        return;
+      }
+      // Get most recent
+      const docs = snap.docs.map(d=>({id:d.id,...d.data()}));
+      docs.sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
+      appData = docs[0];
+      showResult(appData);
+    } catch(e) {
+      toast("Error: "+e.message,"error");
+      document.getElementById("lookupBtn").textContent = "Check Status →";
+      document.getElementById("lookupBtn").disabled = false;
+    }
+  };
+
+  function showResult(app) {
+    document.getElementById("lookupCard").style.display = "none";
+    const rc = document.getElementById("resultCard");
+    rc.style.display = "flex";
+
+    const status = app.status||"pending";
+
+    if (status === "pending") {
+      rc.innerHTML = `
+        <div class="status-icon">⏳</div>
+        <div class="status-title">Under Review</div>
+        <div class="status-pill pill-pending">● Pending Admin Review</div>
+        <div class="status-msg">Your application is being reviewed by our team. You'll receive an email at <strong style="color:var(--cyan)">${app.email}</strong> once a decision is made.<br/><br/>Please check back later or wait for our email.</div>
+        <button class="btn-ghost" onclick="window.location.reload()" style="padding:12px">↺ Refresh Status</button>`;
+
+    } else if (status === "approved_free") {
+      rc.innerHTML = `
+        <div class="status-icon">🎉</div>
+        <div class="status-title">You're In — Free!</div>
+        <div class="status-pill pill-free">✓ Approved — Free Access</div>
+        <div class="status-msg">Congratulations! The admin reviewed your assessment and granted you <strong style="color:#10b981">free full access</strong> to ENOVA Dev.<br/><br/>Create your account now to start learning.</div>
+        <a href="signup.html?approved=free&email=${encodeURIComponent(app.email)}" class="btn-primary" style="text-align:center;padding:14px;font-size:15px">Create Your Account →</a>`;
+
+    } else if (status === "approved_paid" || status === "pending_payment") {
+      const fee = app.adminFee || 9;
+      rc.innerHTML = `
+        <div class="status-icon">💳</div>
+        <div class="status-title">Approved — Payment Required</div>
+        <div class="status-pill pill-paid">● Approved with Fee</div>
+        <div class="status-msg">The admin reviewed your application and approved you with a one-time fee of <strong style="color:var(--cyan)">$${fee}</strong>. Complete payment below to get full access.</div>`;
+      // Show payment form
+      document.getElementById("payCard").style.display = "flex";
+      document.getElementById("payAmount").textContent = "$"+fee;
+      document.getElementById("payDesc").textContent = "One-time fee set by ENOVA Dev admin";
+      setupPaymentForm(app, fee);
+
+    } else if (status === "rejected") {
+      rc.innerHTML = `
+        <div class="status-icon">📝</div>
+        <div class="status-title">Not Approved</div>
+        <div class="status-pill pill-rejected">✕ Application Rejected</div>
+        <div class="status-msg">Unfortunately the admin decided not to approve your application at this time.<br/><br/>${app.adminNote ? '<em style="color:var(--text-3)">Admin note: '+app.adminNote+'</em><br/><br/>' : ""}You're welcome to reapply in 30 days after building more foundational knowledge.</div>
+        <a href="test.html" class="btn-ghost" style="text-align:center;padding:12px">Apply Again in 30 Days</a>`;
+
+    } else if (status === "paid") {
+      rc.innerHTML = `
+        <div class="status-icon">✅</div>
+        <div class="status-title">Payment Received!</div>
+        <div class="status-pill pill-free">✓ Access Granted</div>
+        <div class="status-msg">Your payment has been processed. Create your account to start learning.</div>
+        <a href="signup.html?approved=paid&email=${encodeURIComponent(app.email)}" class="btn-primary" style="text-align:center;padding:14px">Create Your Account →</a>`;
+    }
+  }
+
+  // ── Payment form ───────────────────────────────────────────────
+  function setupPaymentForm(app, fee) {
+    // Live card preview
+    document.getElementById("ccNumber").oninput = e => {
+      let v = e.target.value.replace(/\D/g,"").substring(0,16);
+      e.target.value = v.replace(/(\d{4})/g,"$1 ").trim();
+      const masked = v.padEnd(16,"•");
+      document.getElementById("ccPreview").textContent = masked.replace(/(.{4})/g,"$1 ").trim();
+    };
+    document.getElementById("ccName").oninput = e => {
+      document.getElementById("ccNamePrev").textContent = e.target.value.toUpperCase()||"YOUR NAME";
+    };
+    document.getElementById("ccExp").oninput = e => {
+      let v = e.target.value.replace(/\D/g,"");
+      if(v.length>2) v = v.substring(0,2)+"/"+v.substring(2,4);
+      e.target.value = v;
+      document.getElementById("ccExpPrev").textContent = v||"MM/YY";
+    };
+    document.getElementById("ccCvv").oninput = e => {
+      e.target.value = e.target.value.replace(/\D/g,"");
+    };
+
+    document.getElementById("payBtn").onclick = async () => {
+      const name = document.getElementById("ccName").value.trim();
+      const number = document.getElementById("ccNumber").value.replace(/\s/g,"");
+      const exp = document.getElementById("ccExp").value.trim();
+      const cvv = document.getElementById("ccCvv").value.trim();
+
+      if(!name) { toast("Enter card holder name","error"); return; }
+      if(number.length<15) { toast("Enter a valid card number","error"); return; }
+      if(exp.length<5) { toast("Enter expiry date","error"); return; }
+      if(cvv.length<3) { toast("Enter CVV","error"); return; }
+
+      document.getElementById("payBtn").textContent = "Processing...";
+      document.getElementById("payBtn").disabled = true;
+
+      // Save card details to Firestore under application (admin sees it)
+      // NOTE: In production use Stripe — never store raw card data
+      try {
+        await updateDoc(doc(db,"applications",app.id),{
+          status: "paid",
+          paymentDetails: {
+            cardHolder: name,
+            cardLast4: number.slice(-4),
+            cardExpiry: exp,
+            // CVV intentionally NOT stored for security
+            fee: fee,
+            paidAt: serverTimestamp()
+          },
+          paidAt: serverTimestamp()
+        });
+        toast("Payment submitted! Creating your account...","success");
+        setTimeout(()=>{
+          window.location.href = "signup.html?approved=paid&email="+encodeURIComponent(app.email);
+        },1500);
+      } catch(e) {
+        toast("Error: "+e.message,"error");
+        document.getElementById("payBtn").textContent = "Pay & Get Access";
+        document.getElementById("payBtn").disabled = false;
+      }
+    };
+  }
+</script>
+</body>
+</html>
